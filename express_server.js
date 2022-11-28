@@ -9,16 +9,17 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com',
 };
 
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+
 app.get('/urls.json', (get, res) => {
   res.json(urlDatabase);
 });
 
 app.get('/', (req, res) => {
   res.send('Hello');
-});
-
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <strong>World</strong></body></html>\n');
 });
 
 app.listen(PORT, () => {
