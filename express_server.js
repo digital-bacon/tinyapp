@@ -8,6 +8,8 @@ app.set('view engine', 'ejs');
  * Function that returns a random string of a specified length from a
  * given set of characters
  * @param {number} desiredLength - Total characters desired
+ * @param {string} characterSet - The character set from which to
+ * select random characters
  * @returns {string} A randomized string
  */
 const generateRandomString = (desiredLength = 0, characterSet) => {
