@@ -15,6 +15,10 @@ app.get('/', (req, res) => {
   res.send('Hello');
 });
 
+app.get('/hello', (req, res) => {
+  res.send('<html><body>Hello <strong>World</strong></body></html>\n');
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
