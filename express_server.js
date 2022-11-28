@@ -4,6 +4,32 @@ const PORT = 8080;
 
 app.set('view engine', 'ejs');
 
+/**
+ * Function that returns a random string of a specified length from a
+ * given set of characters
+ * @param {number} desiredLength - Total characters desired
+ * @returns {string} A randomized string
+ */
+const generateRandomString = (desiredLength = 0, characterSet) => {
+   let randomString = '';
+   if (desiredLength === 0) return randomString;
+   const randomCharacter = characters[Math.floor(Math.random() * characterSet.length) + 0];
+   randomString += randomCharacter + generateRandomString((desiredLength - 1));
+   return randomString;
+};
+
+// const characterSets = {
+//   lowercase: 'abcdefghijklmnopqrstuvwxyz',
+//   uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+//   numbers: '0123456789',
+// };
+// let characters = '';
+// characters += characterSets.lowercase;
+// characters += characterSets.uppercase;
+// characters += characterSets.numbers;
+
+// generateRandomString(6, characters);
+
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
