@@ -13,11 +13,11 @@ app.set('view engine', 'ejs');
  * @returns {string} A randomized string
  */
 const generateRandomString = (desiredLength = 0, characterSet) => {
-   let randomString = '';
-   if (desiredLength === 0) return randomString;
-   const randomCharacter = characterSet[Math.floor(Math.random() * characterSet.length) + 0];
-   randomString += randomCharacter + generateRandomString((desiredLength - 1), characterSet);
-   return randomString;
+  let randomString = '';
+  if (desiredLength === 0) return randomString;
+  const randomCharacter = characterSet[Math.floor(Math.random() * characterSet.length) + 0];
+  randomString += randomCharacter + generateRandomString((desiredLength - 1), characterSet);
+  return randomString;
 };
 
 // const characterSets = {
@@ -50,7 +50,7 @@ app.post('/urls', (req, res) => {
   const submittedURL = req.body.longURL;
   urlDatabase[newId] = submittedURL;
   res.redirect('/urls');
-})
+});
 
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
