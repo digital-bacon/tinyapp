@@ -9,24 +9,35 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com',
 };
 
-app.get("/urls", (req, res) => {
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  res.send("OK");
+})
+
+app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
+  res.render('urls_index', templateVars);
 });
 
-app.get("/urls/:id", (req, res) => {
+app.get('/urls/urls_new', (req, res) => {
+  res.render('urls_new');
+});
+
+app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
   const templateVars = { id, longURL };
-  res.render("urls_show", templateVars);
+  res.render('urls_show', templateVars);
 });
 
 app.get('/urls.json', (get, res) => {
   res.json(urlDatabase);
 });
 
-app.get('/', (req, res) => {
-  res.send('Hello');
+app.get('/*', (req, res) => {
+  res.status(404).send('404 - Not found');
 });
 
 app.listen(PORT, () => {
