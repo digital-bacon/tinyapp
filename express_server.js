@@ -54,12 +54,21 @@ const authenticated = (email, password) => {
   return isAuthenticated;
 }
 
-const getUserData = (userId) => {
+const getUserById = (userId) => {
   let userData;
   if (userId === undefined) return userData;
   if (userId === '') return userData;
   if (users[userId] === undefined) return userData;
   userData = users[userId];
+  return userData;
+}
+
+const getUserByEmail = (email) => {
+  let userData;
+  if (email === undefined) return userData;
+  if (email === '') return userData;
+  userData = Object.values(users)
+    .find(userId => userId.email === email);
   return userData;
 }
 
@@ -93,14 +102,14 @@ app.get('/urls/:id', (req, res) => {
   }
   const longURL = urlDatabase[id];
   const userId = req.cookies['user_id'];
-  const userData = getUserData(userId);
+  const userData = getUserById(userId);
   const templateVars = { userData, id, longURL };
   res.render('urls_show', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
   const userId = req.cookies['user_id'];
-  const userData = getUserData(userId);
+  const userData = getUserById(userId);
   const templateVars = { userData };
   res.render('urls_new');
 });
@@ -116,7 +125,7 @@ app.get('/register', (req, res) => {
   if (loggedIn(userId)) {
     res.redirect('/urls');
   };
-  const userData = getUserData(userId);
+  const userData = getUserById(userId);
   const templateVars = { userData };
   res.render('register', templateVars);
 });
@@ -126,7 +135,7 @@ app.get('/urls', (req, res) => {
   // if (loggedIn(userId) === false) {
   //   res.redirect('/login');
   // };
-  const userData = getUserData(userId);
+  const userData = getUserById(userId);
   console.log(typeof userData)
   console.log(JSON.stringify(userData))
   const urls = urlDatabase;
@@ -165,6 +174,14 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/register', (req, res) => {
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
+  // Don't allow a user to register if they didn't enter an email or password
+  if (!submittedEmail || !submittedPassword) {
+    res.status(404).send('404 - Not found');
+  };
+  // Don't allow a user to register if they already have an account
+  if (getUserByEmail(submittedEmail) !== undefined) {
+    res.status(404).send('404 - Not found');
+  };
   // Generate a random user id
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
