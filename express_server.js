@@ -39,15 +39,13 @@ const existsShortURLID = (id) => {
 }
 
 const loggedIn = (userId) => {
-  if (userId === undefined) return false;
-  if (userId === '') return false;
+  if (validUserId(userId) === false) return false;
   if (users[userId] === undefined) return false;
   return true;
 }
 
 const authenticated = (email, password) => {
-  if (email === undefined || password === undefined) return false;
-  if (email === '' || password === '') return false;
+  if (validEmail(email) === false || validEmail(password) === false) return false;
   const userObject = Object.values(users)
     .find(userId => userId.email === email && userId.password === password);
   const isAuthenticated = userObject !== undefined
@@ -56,8 +54,7 @@ const authenticated = (email, password) => {
 
 const getUserById = (userId) => {
   let userData;
-  if (userId === undefined) return userData;
-  if (userId === '') return userData;
+  if (validUserId(userId) === false) return userData;
   if (users[userId] === undefined) return userData;
   userData = users[userId];
   return userData;
@@ -65,11 +62,31 @@ const getUserById = (userId) => {
 
 const getUserByEmail = (email) => {
   let userData;
-  if (email === undefined) return userData;
-  if (email === '') return userData;
+  if (validEmail === false) return userData;
   userData = Object.values(users)
     .find(userId => userId.email === email);
   return userData;
+}
+
+const validEmail = (email) => {
+  if (typeof email !== 'string') return false;
+  if (email === undefined) return false;
+  if (email === '') return false;
+  return true;
+}
+
+const validPassword = (password) => {
+  if (typeof password !== 'string') return false;
+  if (password === undefined) return false;
+  if (password === '') return false;
+  return true;
+}
+
+const validUserId = (userId) => {
+  if (typeof userId !== 'string') return false;
+  if (userId === undefined) return false;
+  if (userId === '') return false;
+  return true;
 }
 
 const urlDatabase = {
@@ -94,6 +111,31 @@ const users = {
  * ROUTES FOR GET REQUESTS
  */
 
+app.get('/login', (req, res) => {
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId)) {
+    res.redirect('/urls');
+  };
+  const userData = getUserById(userId);
+  const templateVars = { userData };
+  res.render('login', templateVars);
+});
+
+app.get('/logout', (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect('/urls');
+});
+
+app.get('/register', (req, res) => {
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId)) {
+    res.redirect('/urls');
+  };
+  const userData = getUserById(userId);
+  const templateVars = { userData };
+  res.render('register', templateVars);
+});
+
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
   // Respond with a 404 if the requested ID does not exist
@@ -112,22 +154,6 @@ app.get('/urls/new', (req, res) => {
   const userData = getUserById(userId);
   const templateVars = { userData };
   res.render('urls_new');
-});
-
-
-app.get('/logout', (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect('/urls');
-});
-
-app.get('/register', (req, res) => {
-  const userId = req.cookies['user_id'];
-  if (loggedIn(userId)) {
-    res.redirect('/urls');
-  };
-  const userData = getUserById(userId);
-  const templateVars = { userData };
-  res.render('register', templateVars);
 });
 
 app.get('/urls', (req, res) => {
@@ -175,7 +201,7 @@ app.post('/register', (req, res) => {
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter an email or password
-  if (!submittedEmail || !submittedPassword) {
+  if (validEmail(email) === false || validPassword(password) === false) {
     res.status(404).send('404 - Not found');
   };
   // Don't allow a user to register if they already have an account
@@ -216,12 +242,21 @@ app.post('/urls', (req, res) => {
 
 app.post('/login', (req, res) => {
   // TODO: Check if user is already logged-in
-  const submittedUserId = req.body.userId;
+  const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
-  if (authenticated(submittedUserId, submittedPassword) === false) {
+  // Don't allow a user to login if they didn't enter an email or password
+  if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
+    res.status(404).send('404 - Not found');
+  };
+  // Authenticate the user
+  if (authenticated(submittedEmail, submittedPassword) === false) {
     res.redirect('/login');
   }
-  res.cookie('user_id', submittedUserId);
+  // User was authenticated, retrieve user data
+  const userData = getUserByEmail(submittedEmail);
+  const userId = userData.id;
+  // Log the user in, then redirect
+  res.cookie('user_id', userId);
   res.redirect('/urls');
 });
 
