@@ -23,10 +23,10 @@
       </div>
       <a href="/logout" class="btn btn-warning" title="Logout of your TinyApp account">Logout</a>
       <% } else { %>
-      <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
-        <input class="form-control mr-sm-2" name='username' type="text" placeholder="Enter username" aria-label="Username">
-        <button class="btn btn-warning my-2 my-sm-0" type="submit">Login</button>
-      </form>
+      <div class="mx-3">
+        <a href="/login" title="Log in to your account" class="btn btn-link my-2 my-sm-0 text-light">Log in</a>
+        <a href="/register" title="Register an account" class="btn btn-warning my-2 my-sm-0">Register</a>
+      </div>
       <% } %>
     </div>
   </nav>

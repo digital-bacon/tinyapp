@@ -195,11 +195,31 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post('/login', (req, res) => {
+  // TODO: Check if user is already logged-in
+  const submittedEmail = req.body.email;
+  const submittedPassword = req.body.password;
+  // Don't allow a user to login if they didn't enter an email or password
+  if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
+    res.status(404).send('404 - Not found');
+  };
+  // Authenticate the user
+  if (authenticated(submittedEmail, submittedPassword) === false) {
+    res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+  }
+  // User was authenticated, retrieve user data
+  const userData = getUserByEmail(submittedEmail);
+  const userId = userData.id;
+  // Log the user in, then redirect
+  res.cookie('user_id', userId);
+  res.redirect('/urls');
+});
+
 app.post('/register', (req, res) => {
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter an email or password
-  if (validEmail(email) === false || validPassword(password) === false) {
+  if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
     res.status(404).send('404 - Not found');
   };
   // Don't allow a user to register if they already have an account
@@ -235,26 +255,6 @@ app.post('/urls', (req, res) => {
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
   urlDatabase[newId] = submittedURL;
-  res.redirect('/urls');
-});
-
-app.post('/login', (req, res) => {
-  // TODO: Check if user is already logged-in
-  const submittedEmail = req.body.email;
-  const submittedPassword = req.body.password;
-  // Don't allow a user to login if they didn't enter an email or password
-  if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
-    res.status(404).send('404 - Not found');
-  };
-  // Authenticate the user
-  if (authenticated(submittedEmail, submittedPassword) === false) {
-    res.redirect('/login');
-  }
-  // User was authenticated, retrieve user data
-  const userData = getUserByEmail(submittedEmail);
-  const userId = userData.id;
-  // Log the user in, then redirect
-  res.cookie('user_id', userId);
   res.redirect('/urls');
 });
 
