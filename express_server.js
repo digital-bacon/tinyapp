@@ -20,17 +20,12 @@ const generateRandomString = (desiredLength = 0, characterSet) => {
   return randomString;
 };
 
-// const characterSets = {
-//   lowercase: 'abcdefghijklmnopqrstuvwxyz',
-//   uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-//   numbers: '0123456789',
+// const validURL = (url) => {
+//   if (typeof url !== 'string') return false;
+//   if (url.length === 0) return false;
+//   const lowerCaseURL = url.toLowerCase();
+//   if (lowerCaseURL.slice(6) !== 'http://' && lowerCaseURL !== 'https') return false;
 // };
-// let characters = '';
-// characters += characterSets.lowercase;
-// characters += characterSets.uppercase;
-// characters += characterSets.numbers;
-
-// generateRandomString(6, characters);
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -42,6 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 app.post('/urls', (req, res) => {
   // TODO: Validate submitted URL as a URL, handle response if invalid
   const submittedURL = req.body.longURL;
+  // const isValidURL = (validURL(submittedURL));
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
     uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
