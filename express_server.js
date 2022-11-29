@@ -1,12 +1,12 @@
 const express = require('express');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 /**
  * Function that returns a random string of a specified length from a
@@ -36,21 +36,21 @@ const existsShortURLID = (id) => {
   if (id === '') return false;
   if (urlDatabase[id] !== undefined) return true;
   return false;
-}
+};
 
 const loggedIn = (userId) => {
   if (validUserId(userId) === false) return false;
   if (users[userId] === undefined) return false;
   return true;
-}
+};
 
 const authenticated = (email, password) => {
   if (validEmail(email) === false || validEmail(password) === false) return false;
   const userObject = Object.values(users)
     .find(userId => userId.email === email && userId.password === password);
-  const isAuthenticated = userObject !== undefined
+  const isAuthenticated = userObject !== undefined;
   return isAuthenticated;
-}
+};
 
 const getUserById = (userId) => {
   let userData;
@@ -58,7 +58,7 @@ const getUserById = (userId) => {
   if (users[userId] === undefined) return userData;
   userData = users[userId];
   return userData;
-}
+};
 
 const getUserByEmail = (email) => {
   let userData;
@@ -66,28 +66,28 @@ const getUserByEmail = (email) => {
   userData = Object.values(users)
     .find(userId => userId.email === email);
   return userData;
-}
+};
 
 const validEmail = (email) => {
   if (typeof email !== 'string') return false;
   if (email === undefined) return false;
   if (email === '') return false;
   return true;
-}
+};
 
 const validPassword = (password) => {
   if (typeof password !== 'string') return false;
   if (password === undefined) return false;
   if (password === '') return false;
   return true;
-}
+};
 
 const validUserId = (userId) => {
   if (typeof userId !== 'string') return false;
   if (userId === undefined) return false;
   if (userId === '') return false;
   return true;
-}
+};
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -115,7 +115,7 @@ app.get('/login', (req, res) => {
   const userId = req.cookies['user_id'];
   if (loggedIn(userId)) {
     res.redirect('/urls');
-  };
+  }
   const userData = getUserById(userId);
   const templateVars = { userData };
   res.render('login', templateVars);
@@ -130,7 +130,7 @@ app.get('/register', (req, res) => {
   const userId = req.cookies['user_id'];
   if (loggedIn(userId)) {
     res.redirect('/urls');
-  };
+  }
   const userData = getUserById(userId);
   const templateVars = { userData };
   res.render('register', templateVars);
@@ -153,7 +153,7 @@ app.get('/urls/new', (req, res) => {
   const userId = req.cookies['user_id'];
   const userData = getUserById(userId);
   const templateVars = { userData };
-  res.render('urls_new');
+  res.render('urls_new', templateVars);
 });
 
 app.get('/urls', (req, res) => {
@@ -202,7 +202,7 @@ app.post('/login', (req, res) => {
   // Don't allow a user to login if they didn't enter an email or password
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
     res.status(404).send('404 - Not found');
-  };
+  }
   // Authenticate the user
   if (authenticated(submittedEmail, submittedPassword) === false) {
     res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
@@ -221,11 +221,11 @@ app.post('/register', (req, res) => {
   // Don't allow a user to register if they didn't enter an email or password
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
     res.status(404).send('404 - Not found');
-  };
+  }
   // Don't allow a user to register if they already have an account
   if (getUserByEmail(submittedEmail) !== undefined) {
     res.status(404).send('404 - Not found');
-  };
+  }
   // Generate a random user id
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
