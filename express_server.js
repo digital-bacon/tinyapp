@@ -41,6 +41,50 @@ const urlDatabase = {
 
 app.use(express.urlencoded({ extended: true }));
 
+/*
+ * ROUTES FOR GET REQUESTS
+ */
+
+app.get('/urls/:id', (req, res) => {
+  const id = req.params.id;
+  // Respond with a 404 if the requested ID does not exist
+  if (existsShortURLID(id) === false) {
+    res.status(404).send('404 - Not found');
+  }
+  const longURL = urlDatabase[id];
+  const templateVars = { id, longURL };
+  res.render('urls_show', templateVars);
+});
+
+app.get('/urls/new', (req, res) => {
+  res.render('urls_new');
+});
+
+app.get('/urls', (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+});
+
+app.get('/urls.json', (get, res) => {
+  res.json(urlDatabase);
+});
+
+app.get('/*', (req, res) => {
+  res.status(404).send('404 - Not found');
+});
+
+/*
+ * ROUTES FOR POST REQUESTS
+ */
+app.post('/urls/:id/update', (req, res) => {
+  const id = req.params.id;
+  if (existsShortURLID(id)) {
+    const submittedURL = req.body.longURL;
+    urlDatabase[id] = submittedURL;
+  }
+  res.redirect('/urls');
+});
+
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   if (existsShortURLID(id)) {
@@ -48,6 +92,8 @@ app.post('/urls/:id/delete', (req, res) => {
   }
   res.redirect('/urls');
 });
+
+
 
 app.post('/urls', (req, res) => {
   // TODO: Validate submitted URL as a URL, handle response if invalid
@@ -62,37 +108,6 @@ app.post('/urls', (req, res) => {
   const newId = generateRandomString(6, useCharacters);
   urlDatabase[newId] = submittedURL;
   res.redirect('/urls');
-});
-
-app.get("/u/:id", (req, res) => {
-  // TODO: Validate ID matches an existing value, handle response if not found
-  const id = req.params.id;
-  const longURL = urlDatabase[id];
-  res.redirect(longURL);
-});
-
-app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  res.render('urls_index', templateVars);
-});
-
-app.get('/urls/urls_new', (req, res) => {
-  res.render('urls_new');
-});
-
-app.get('/urls/:id', (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[id];
-  const templateVars = { id, longURL };
-  res.render('urls_show', templateVars);
-});
-
-app.get('/urls.json', (get, res) => {
-  res.json(urlDatabase);
-});
-
-app.get('/*', (req, res) => {
-  res.status(404).send('404 - Not found');
 });
 
 app.listen(PORT, () => {
