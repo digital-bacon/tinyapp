@@ -31,10 +31,10 @@ const generateRandomString = (desiredLength = 0, characterSet) => {
 //   if (lowerCaseURL.slice(6) !== 'http://' && lowerCaseURL !== 'https') return false;
 // };
 
-const existsShortURLID = (id) => {
-  if (typeof id === 'undefined') return false;
-  if (id === '') return false;
-  if (urlDatabase[id] !== undefined) return true;
+const existsShortURLID = (shortUrlId) => {
+  if (typeof shortUrlId === 'undefined') return false;
+  if (shortUrlId === '') return false;
+  if (urlDatabase[shortUrlId] !== undefined) return true;
   return false;
 };
 
@@ -167,16 +167,25 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:id', (req, res) => {
-  const id = req.params.id;
+  const urlId = req.params.id;
   // Respond with a 404 if the requested ID does not exist
-  if (existsShortURLID(id) === false) {
+  if (existsShortURLID(urlId) === false) {
     res.status(404).send('404 - Not found');
   }
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[urlId];
   const userId = req.cookies['user_id'];
   const userData = getUserById(userId);
   const templateVars = { userData, id, longURL };
   res.render('urls_show', templateVars);
+});
+
+app.get('/u/:id', (req, res) => {
+  const urlId = req.params.id;
+  if (existsShortURLID(urlId) === false) {
+    res.status(404).send('404 - Not found');
+  }
+  const longURL = urlDatabase[urlId];
+  res.redirect(longURL);
 });
 
 app.get('/*', (req, res) => {
@@ -193,10 +202,11 @@ app.post('/urls/:id/update', (req, res) => {
     res.redirect('/login');
   }
   const urlId = req.params.id;
-  if (existsShortURLID(urlId)) {
-    const submittedURL = req.body.longURL;
-    urlDatabase[urlId] = submittedURL;
+  if (existsShortURLID(urlId) === false) {
+    res.status(404).send('404 - Not found');
   }
+  const submittedURL = req.body.longURL;
+  urlDatabase[urlId] = submittedURL;
   res.redirect('/urls');
 });
 
@@ -207,9 +217,10 @@ app.post('/urls/:id/delete', (req, res) => {
     res.redirect('/login');
   }
   const urlId = req.params.id;
-  if (existsShortURLID(urlId)) {
-    delete urlDatabase[urlId];
+  if (existsShortURLID(urlId) === false) {
+    res.status(404).send('404 - Not found');
   }
+  delete urlDatabase[urlId];
   res.redirect('/urls');
 });
 
