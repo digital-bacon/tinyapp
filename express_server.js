@@ -111,6 +111,10 @@ const users = {
  * ROUTES FOR GET REQUESTS
  */
 
+app.get('/', (req, res) => {
+  res.redirect('/urls');
+});
+
 app.get('/login', (req, res) => {
   const userId = req.cookies['user_id'];
   if (loggedIn(userId)) {
