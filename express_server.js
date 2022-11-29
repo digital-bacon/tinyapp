@@ -38,6 +38,12 @@ const existsShortURLID = (id) => {
   return false;
 }
 
+const loggedIn = (username) => {
+  if (username === undefined) return false;
+  if (username === '') return false;
+  return true;
+}
+
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
@@ -63,9 +69,19 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
 
+
 app.get('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
+});
+
+app.get('/register', (req, res) => {
+  const username = req.cookies['username'];
+  if (loggedIn(username)) {
+    res.redirect('/urls');
+  };
+  const templateVars = { username };
+  res.render('register', templateVars);
 });
 
 app.get('/urls', (req, res) => {
