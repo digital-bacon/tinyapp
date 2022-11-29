@@ -162,8 +162,6 @@ app.get('/urls', (req, res) => {
   //   res.redirect('/login');
   // };
   const userData = getUserById(userId);
-  console.log(typeof userData)
-  console.log(JSON.stringify(userData))
   const urls = urlDatabase;
   const templateVars = { userData, urls };
   res.render('urls_index', templateVars);
