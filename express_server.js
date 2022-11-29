@@ -27,12 +27,27 @@ const generateRandomString = (desiredLength = 0, characterSet) => {
 //   if (lowerCaseURL.slice(6) !== 'http://' && lowerCaseURL !== 'https') return false;
 // };
 
+const existsShortURLID = (id) => {
+  if (typeof id === 'undefined') return false;
+  if (id === '') return false;
+  if (urlDatabase[id] !== undefined) return true;
+  return false;
+}
+
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
 };
 
 app.use(express.urlencoded({ extended: true }));
+
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  if (existsShortURLID(id)) {
+    delete urlDatabase[id];
+  }
+  res.redirect('/urls');
+});
 
 app.post('/urls', (req, res) => {
   // TODO: Validate submitted URL as a URL, handle response if invalid
