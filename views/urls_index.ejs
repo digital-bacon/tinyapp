@@ -23,17 +23,17 @@
           </tr>
         </thead>
         <tbody>
-          <% for (let id in urls) { %>
+          <% for (const urlId in urls) { %>
             <tr>
-              <td><%= id %></td>
-              <td><%= urls[urlId] %></td>
+              <td><%= urlId %></td>
+              <td><%= urls[urlId].longUrl %></td>
               <td class="text-center">
-                <a href="urls/<%= id %>" title="<%= urls[urlId] %>" class="btn btn-outline-primary">Edit</a> 
+                <a href="urls/<%= urlId %>" title="<%= urls[urlId] %>" class="btn btn-outline-primary">Edit</a> 
               </td>
               <td class="text-center">
-                <form method="POST" action="/urls/<%= id %>/delete">
-                  <input type="submit" id="delete-<%= id %>" name="delete-<%= id %>" class="btn btn-outline-danger" value="Delete">
-                  <input type="hidden" name="id" value="<%= id %>">
+                <form method="POST" action="/urls/<%= urlId %>/delete">
+                  <input type="submit" id="delete-<%= urlId %>" name="delete-<%= urlId %>" class="btn btn-outline-danger" value="Delete">
+                  <input type="hidden" name="urlId" value="<%= urlId %>">
                 </form>
               </td>
             </tr>

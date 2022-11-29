@@ -24,14 +24,14 @@ const generateRandomString = (desiredLength = 0, characterSet) => {
   return randomString;
 };
 
-// const validURL = (url) => {
+// const validUrl = (url) => {
 //   if (typeof url !== 'string') return false;
 //   if (url.length === 0) return false;
-//   const lowerCaseURL = url.toLowerCase();
-//   if (lowerCaseURL.slice(6) !== 'http://' && lowerCaseURL !== 'https') return false;
+//   const lowerCaseUrl = url.toLowerCase();
+//   if (lowerCaseUrl.slice(6) !== 'http://' && lowerCaseUrl !== 'https') return false;
 // };
 
-const existsShortURLID = (shortUrlId) => {
+const existsShortUrlID = (shortUrlId) => {
   if (typeof shortUrlId === 'undefined') return false;
   if (shortUrlId === '') return false;
   if (urlDatabase[shortUrlId] !== undefined) return true;
@@ -90,8 +90,12 @@ const validUserId = (userId) => {
 };
 
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com',
+  'b2xVn2': {
+    longUrl: 'http://www.lighthouselabs.ca'
+  },
+  '9sm5xK': {
+    longUrl: 'http://www.google.com'
+  },
 };
 
 const users = {
@@ -110,9 +114,37 @@ const users = {
 /*
  * ROUTES FOR GET REQUESTS
  */
+app.get('/u/:id', (req, res) => {
+  const urlId = req.params.id;
+  if (existsShortUrlID(urlId) === false) {
+    res.status(404).send('404 - Not found');
+  }
+  const longUrl = urlDatabase[urlId].longUrl;
+  res.redirect(longUrl);
+});
 
-app.get('/', (req, res) => {
-  res.redirect('/urls');
+app.get('/urls/new', (req, res) => {
+  // Redirect if the user is not logged in
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === false) {
+    res.redirect('/login');
+  }
+  const userData = getUserById(userId);
+  const templateVars = { userData };
+  res.render('urls_new', templateVars);
+});
+
+app.get('/urls/:id', (req, res) => {
+  const urlId = req.params.id;
+  // Respond with a 404 if the requested ID does not exist
+  if (existsShortUrlID(urlId) === false) {
+    res.status(404).send('404 - Not found');
+  }
+  const longUrl = urlDatabase[urlId].longUrl;
+  const userId = req.cookies['user_id'];
+  const userData = getUserById(userId);
+  const templateVars = { userData, urlId, longUrl };
+  res.render('urls_show', templateVars);
 });
 
 app.get('/login', (req, res) => {
@@ -142,7 +174,6 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
-
 app.get('/urls', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.cookies['user_id'];
@@ -155,37 +186,8 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-app.get('/urls/new', (req, res) => {
-  // Redirect if the user is not logged in
-  const userId = req.cookies['user_id'];
-  if (loggedIn(userId) === false) {
-    res.redirect('/login');
-  }
-  const userData = getUserById(userId);
-  const templateVars = { userData };
-  res.render('urls_new', templateVars);
-});
-
-app.get('/urls/:id', (req, res) => {
-  const urlId = req.params.id;
-  // Respond with a 404 if the requested ID does not exist
-  if (existsShortURLID(urlId) === false) {
-    res.status(404).send('404 - Not found');
-  }
-  const longURL = urlDatabase[urlId];
-  const userId = req.cookies['user_id'];
-  const userData = getUserById(userId);
-  const templateVars = { userData, urlId, longURL };
-  res.render('urls_show', templateVars);
-});
-
-app.get('/u/:id', (req, res) => {
-  const urlId = req.params.id;
-  if (existsShortURLID(urlId) === false) {
-    res.status(404).send('404 - Not found');
-  }
-  const longURL = urlDatabase[urlId];
-  res.redirect(longURL);
+app.get('/', (req, res) => {
+  res.redirect('/urls');
 });
 
 app.get('/*', (req, res) => {
@@ -202,11 +204,11 @@ app.post('/urls/:id/update', (req, res) => {
     res.redirect('/login');
   }
   const urlId = req.params.id;
-  if (existsShortURLID(urlId) === false) {
+  if (existsShortUrlID(urlId) === false) {
     res.status(404).send('404 - Not found');
   }
-  const submittedURL = req.body.longURL;
-  urlDatabase[urlId] = submittedURL;
+  const submittedUrl = req.body.longUrl;
+  urlDatabase[urlId].longUrl = submittedUrl;
   res.redirect('/urls');
 });
 
@@ -217,7 +219,7 @@ app.post('/urls/:id/delete', (req, res) => {
     res.redirect('/login');
   }
   const urlId = req.params.id;
-  if (existsShortURLID(urlId) === false) {
+  if (existsShortUrlID(urlId) === false) {
     res.status(404).send('404 - Not found');
   }
   delete urlDatabase[urlId];
@@ -286,9 +288,9 @@ app.post('/urls', (req, res) => {
   if (loggedIn(userId) === false) {
     res.redirect('/login');
   }
-  // TODO: Validate submitted URL as a URL, handle response if invalid
-  const submittedURL = req.body.longURL;
-  // const isValidURL = (validURL(submittedURL));
+  // TODO: Validate submitted Url as a Url, handle response if invalid
+  const submittedUrl = req.body.longUrl;
+  // const isValidUrl = (validUrl(submittedUrl));
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
     uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -296,7 +298,7 @@ app.post('/urls', (req, res) => {
   };
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
-  urlDatabase[newId] = submittedURL;
+  urlDatabase[newId] = submittedUrl;
   res.redirect('/urls');
 });
 
