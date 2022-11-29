@@ -44,12 +44,12 @@ const loggedIn = (userId) => {
   return true;
 };
 
-const authenticated = (email, password) => {
+const authenticateUser = (email, password) => {
   if (validEmail(email) === false || validEmail(password) === false) return false;
   const userObject = Object.values(users)
     .find(userId => userId.email === email && userId.password === password);
-  const isAuthenticated = userObject !== undefined;
-  return isAuthenticated;
+  const isauthenticateUser = userObject !== undefined;
+  return isauthenticateUser;
 };
 
 const getUserById = (userId) => {
@@ -116,8 +116,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+  // Redirect if the user is already logged in
   const userId = req.cookies['user_id'];
-  if (loggedIn(userId)) {
+  if (loggedIn(userId) === true) {
     res.redirect('/urls');
   }
   const userData = getUserById(userId);
@@ -131,8 +132,9 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+  // Redirect if the user is already logged in
   const userId = req.cookies['user_id'];
-  if (loggedIn(userId)) {
+  if (loggedIn(userId) === true) {
     res.redirect('/urls');
   }
   const userData = getUserById(userId);
@@ -142,10 +144,11 @@ app.get('/register', (req, res) => {
 
 
 app.get('/urls', (req, res) => {
+  // Redirect if the user is not logged in
   const userId = req.cookies['user_id'];
-  // if (loggedIn(userId) === false) {
-  //   res.redirect('/login');
-  // };
+  if (loggedIn(userId) === false) {
+    res.redirect('/login');
+  }
   const userData = getUserById(userId);
   const urls = urlDatabase;
   const templateVars = { userData, urls };
@@ -153,7 +156,11 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  // Redirect if the user is not logged in
   const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === false) {
+    res.redirect('/login');
+  }
   const userData = getUserById(userId);
   const templateVars = { userData };
   res.render('urls_new', templateVars);
@@ -172,10 +179,6 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-app.get('/urls.json', (get, res) => {
-  res.json(urlDatabase);
-});
-
 app.get('/*', (req, res) => {
   res.status(404).send('404 - Not found');
 });
@@ -184,24 +187,38 @@ app.get('/*', (req, res) => {
  * ROUTES FOR POST REQUESTS
  */
 app.post('/urls/:id/update', (req, res) => {
-  const id = req.params.id;
-  if (existsShortURLID(id)) {
+  // Redirect if the user is not logged in
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === false) {
+    res.redirect('/login');
+  }
+  const urlId = req.params.id;
+  if (existsShortURLID(urlId)) {
     const submittedURL = req.body.longURL;
-    urlDatabase[id] = submittedURL;
+    urlDatabase[urlId] = submittedURL;
   }
   res.redirect('/urls');
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  const id = req.params.id;
-  if (existsShortURLID(id)) {
-    delete urlDatabase[id];
+  // Redirect if the user is not logged in
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === false) {
+    res.redirect('/login');
+  }
+  const urlId = req.params.id;
+  if (existsShortURLID(urlId)) {
+    delete urlDatabase[urlId];
   }
   res.redirect('/urls');
 });
 
 app.post('/login', (req, res) => {
-  // TODO: Check if user is already logged-in
+  // Redirect if the user is already logged in
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === true) {
+    res.redirect('/urls');
+  }
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to login if they didn't enter an email or password
@@ -209,18 +226,22 @@ app.post('/login', (req, res) => {
     res.status(404).send('404 - Not found');
   }
   // Authenticate the user
-  if (authenticated(submittedEmail, submittedPassword) === false) {
+  if (authenticateUser(submittedEmail, submittedPassword) === false) {
     res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
-  // User was authenticated, retrieve user data
+  // User was authenticateUser, retrieve user data
   const userData = getUserByEmail(submittedEmail);
-  const userId = userData.id;
   // Log the user in, then redirect
-  res.cookie('user_id', userId);
+  res.cookie('user_id', userData.id);
   res.redirect('/urls');
 });
 
 app.post('/register', (req, res) => {
+  // Redirect if the user is already logged in
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === true) {
+    res.redirect('/urls');
+  }
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter an email or password
@@ -249,6 +270,11 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
+  // Redirect if the user is not logged in
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId) === false) {
+    res.redirect('/login');
+  }
   // TODO: Validate submitted URL as a URL, handle response if invalid
   const submittedURL = req.body.longURL;
   // const isValidURL = (validURL(submittedURL));
