@@ -40,6 +40,8 @@ const urlDatabase = {
 app.use(express.urlencoded({ extended: true }));
 
 app.post('/urls', (req, res) => {
+  // TODO: Validate submitted URL as a URL, handle response if invalid
+  const submittedURL = req.body.longURL;
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
     uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -47,9 +49,15 @@ app.post('/urls', (req, res) => {
   };
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
-  const submittedURL = req.body.longURL;
   urlDatabase[newId] = submittedURL;
   res.redirect('/urls');
+});
+
+app.get("/u/:id", (req, res) => {
+  // TODO: Validate ID matches an existing value, handle response if not found
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  res.redirect(longURL);
 });
 
 app.get('/urls', (req, res) => {
