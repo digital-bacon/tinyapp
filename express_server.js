@@ -91,10 +91,12 @@ const validUserId = (userId) => {
 
 const urlDatabase = {
   'b2xVn2': {
-    longUrl: 'http://www.lighthouselabs.ca'
+    userId: 'user2RandomID',
+    longUrl: 'http://www.lighthouselabs.ca',
   },
   '9sm5xK': {
-    longUrl: 'http://www.google.com'
+    userId: 'user2RandomID',
+    longUrl: 'http://www.google.com',
   },
 };
 
