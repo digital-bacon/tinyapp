@@ -16,14 +16,14 @@
     <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <h5 class="card-title">TinyURL for: <a href="/u/<%= urlId %>" title="Go to <%= longURL %>"><%= longURL %></a></h5>
         <p class="card-text">
-          Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
+          Short URL ID: <%= urlId %>
         </p>
       </div>
       <div class="card-footer text-muted">
         <h3>Edit</h3>
-        <form class="form-inline justify-content-center" action="/urls/<%= id %>/update" method="POST">
+        <form class="form-inline justify-content-center" action="/urls/<%= urlId %>/update" method="POST">
           <div class="form-group mb-2">
             <label for="longURL">New URL:</label>
             <input
