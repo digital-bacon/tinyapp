@@ -140,6 +140,25 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
+
+app.get('/urls', (req, res) => {
+  const userId = req.cookies['user_id'];
+  // if (loggedIn(userId) === false) {
+  //   res.redirect('/login');
+  // };
+  const userData = getUserById(userId);
+  const urls = urlDatabase;
+  const templateVars = { userData, urls };
+  res.render('urls_index', templateVars);
+});
+
+app.get('/urls/new', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const userData = getUserById(userId);
+  const templateVars = { userData };
+  res.render('urls_new', templateVars);
+});
+
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
   // Respond with a 404 if the requested ID does not exist
@@ -151,24 +170,6 @@ app.get('/urls/:id', (req, res) => {
   const userData = getUserById(userId);
   const templateVars = { userData, id, longURL };
   res.render('urls_show', templateVars);
-});
-
-app.get('/urls/new', (req, res) => {
-  const userId = req.cookies['user_id'];
-  const userData = getUserById(userId);
-  const templateVars = { userData };
-  res.render('urls_new', templateVars);
-});
-
-app.get('/urls', (req, res) => {
-  const userId = req.cookies['user_id'];
-  // if (loggedIn(userId) === false) {
-  //   res.redirect('/login');
-  // };
-  const userData = getUserById(userId);
-  const urls = urlDatabase;
-  const templateVars = { userData, urls };
-  res.render('urls_index', templateVars);
 });
 
 app.get('/urls.json', (get, res) => {
