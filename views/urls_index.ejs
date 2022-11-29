@@ -28,11 +28,11 @@
               <td><%= id %></td>
               <td><%= urls[id] %></td>
               <td class="text-center">
-                <a href="urls/<%= id %>" title="<%= urls[id] %>" class="btn btn-large btn-outline-primary">Edit</a> 
+                <a href="urls/<%= id %>" title="<%= urls[id] %>" class="btn btn-outline-primary">Edit</a> 
               </td>
               <td class="text-center">
                 <form method="POST" action="/urls/<%= id %>/delete">
-                  <input type="submit" id="delete-<%= id %>" name="delete-<%= id %>" class="btn btn-large btn-outline-danger" value="Delete">
+                  <input type="submit" id="delete-<%= id %>" name="delete-<%= id %>" class="btn btn-outline-danger" value="Delete">
                   <input type="hidden" name="id" value="<%= id %>">
                 </form>
               </td>

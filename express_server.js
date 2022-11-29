@@ -1,8 +1,12 @@
 const express = require('express');
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080;
 
 app.set('view engine', 'ejs');
+
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser())
 
 /**
  * Function that returns a random string of a specified length from a
@@ -39,8 +43,6 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com',
 };
 
-app.use(express.urlencoded({ extended: true }));
-
 /*
  * ROUTES FOR GET REQUESTS
  */
@@ -52,7 +54,8 @@ app.get('/urls/:id', (req, res) => {
     res.status(404).send('404 - Not found');
   }
   const longURL = urlDatabase[id];
-  const templateVars = { id, longURL };
+  const username = req.cookies['username'];
+  const templateVars = { id, longURL, username };
   res.render('urls_show', templateVars);
 });
 
@@ -60,8 +63,14 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
 
+app.get('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
+
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const username = req.cookies['username'];
+  const templateVars = { username, urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
 
@@ -93,8 +102,6 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-
-
 app.post('/urls', (req, res) => {
   // TODO: Validate submitted URL as a URL, handle response if invalid
   const submittedURL = req.body.longURL;
@@ -107,6 +114,13 @@ app.post('/urls', (req, res) => {
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
   urlDatabase[newId] = submittedURL;
+  res.redirect('/urls');
+});
+
+app.post('/login', (req, res) => {
+  // TODO: Check if user is already logged-in
+  const submittedUsername = req.body.username;
+  res.cookie('username', submittedUsername);
   res.redirect('/urls');
 });
 

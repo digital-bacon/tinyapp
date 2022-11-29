@@ -13,10 +13,21 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
+      <ul class="navbar-nav mr-auto">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </ul>
+      <% if (username !== undefined) { %>
+      <div class="mx-3">
+        <p class="m-0">Logged in as, <span class="font-weight-bold"><%= username %></span></p>
       </div>
+      <a href="/logout" class="btn btn-warning" title="Logout of your TinyApp account">Logout</a>
+      <% } else { %>
+      <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
+        <input class="form-control mr-sm-2" name='username' type="text" placeholder="Enter username" aria-label="Username">
+        <button class="btn btn-warning my-2 my-sm-0" type="submit">Login</button>
+      </form>
+      <% } %>
     </div>
   </nav>
 </header>
