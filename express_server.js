@@ -38,10 +38,29 @@ const existsShortURLID = (id) => {
   return false;
 }
 
-const loggedIn = (username) => {
-  if (username === undefined) return false;
-  if (username === '') return false;
+const loggedIn = (userId) => {
+  if (userId === undefined) return false;
+  if (userId === '') return false;
+  if (users[userId] === undefined) return false;
   return true;
+}
+
+const authenticated = (email, password) => {
+  if (email === undefined || password === undefined) return false;
+  if (email === '' || password === '') return false;
+  const userObject = Object.values(users)
+    .find(userId => userId.email === email && userId.password === password);
+  const isAuthenticated = userObject !== undefined
+  return isAuthenticated;
+}
+
+const getUserData = (userId) => {
+  let userData;
+  if (userId === undefined) return userData;
+  if (userId === '') return userData;
+  if (users[userId] === undefined) return userData;
+  userData = users[userId];
+  return userData;
 }
 
 const urlDatabase = {
@@ -73,33 +92,45 @@ app.get('/urls/:id', (req, res) => {
     res.status(404).send('404 - Not found');
   }
   const longURL = urlDatabase[id];
-  const username = req.cookies['username'];
-  const templateVars = { id, longURL, username };
+  const userId = req.cookies['user_id'];
+  const userData = getUserData(userId);
+  const templateVars = { userData, id, longURL };
   res.render('urls_show', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const userData = getUserData(userId);
+  const templateVars = { userData };
   res.render('urls_new');
 });
 
 
 app.get('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
 app.get('/register', (req, res) => {
-  const username = req.cookies['username'];
-  if (loggedIn(username)) {
+  const userId = req.cookies['user_id'];
+  if (loggedIn(userId)) {
     res.redirect('/urls');
   };
-  const templateVars = { username };
+  const userData = getUserData(userId);
+  const templateVars = { userData };
   res.render('register', templateVars);
 });
 
 app.get('/urls', (req, res) => {
-  const username = req.cookies['username'];
-  const templateVars = { username, urls: urlDatabase };
+  const userId = req.cookies['user_id'];
+  // if (loggedIn(userId) === false) {
+  //   res.redirect('/login');
+  // };
+  const userData = getUserData(userId);
+  console.log(typeof userData)
+  console.log(JSON.stringify(userData))
+  const urls = urlDatabase;
+  const templateVars = { userData, urls };
   res.render('urls_index', templateVars);
 });
 
@@ -146,7 +177,8 @@ app.post('/register', (req, res) => {
     email: submittedEmail,
     password: submittedPassword
   };
-  res.cookie('username', newUserId);
+  // Log the new user in, then redirect
+  res.cookie('user_id', newUserId);
   res.redirect('/urls');
 });
 
@@ -167,8 +199,12 @@ app.post('/urls', (req, res) => {
 
 app.post('/login', (req, res) => {
   // TODO: Check if user is already logged-in
-  const submittedUsername = req.body.username;
-  res.cookie('username', submittedUsername);
+  const submittedUserId = req.body.userId;
+  const submittedPassword = req.body.password;
+  if (authenticated(submittedUserId, submittedPassword) === false) {
+    res.redirect('/login');
+  }
+  res.cookie('user_id', submittedUserId);
   res.redirect('/urls');
 });
 

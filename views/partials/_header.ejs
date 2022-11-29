@@ -17,9 +17,9 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </ul>
-      <% if (username !== undefined) { %>
+      <% if (userData !== undefined) { %>
       <div class="mx-3">
-        <p class="m-0">Logged in as, <span class="font-weight-bold"><%= username %></span></p>
+        <p class="m-0">Logged in as, <span class="font-weight-bold"><%= userData.email %></span></p>
       </div>
       <a href="/logout" class="btn btn-warning" title="Logout of your TinyApp account">Logout</a>
       <% } else { %>
