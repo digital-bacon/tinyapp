@@ -175,7 +175,7 @@ app.get('/urls/:id', (req, res) => {
   const longURL = urlDatabase[urlId];
   const userId = req.cookies['user_id'];
   const userData = getUserById(userId);
-  const templateVars = { userData, id, longURL };
+  const templateVars = { userData, urlId, longURL };
   res.render('urls_show', templateVars);
 });
 
