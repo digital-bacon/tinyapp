@@ -123,7 +123,7 @@ app.get('/login', (req, res) => {
 
 app.get('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get('/register', (req, res) => {
