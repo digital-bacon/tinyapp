@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const morgan = require("morgan");
 const dbUrl = require('./data/url');
 const dbUser = require('./data/user');
 const {
@@ -22,6 +23,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2'],
