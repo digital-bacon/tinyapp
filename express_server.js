@@ -22,9 +22,6 @@ const PORT = 8080;
 
 app.set('view engine', 'ejs');
 
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
-app.use(express.static("public"));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2'],
@@ -32,6 +29,10 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(express.static("public"));
+
 
 const authenticateUser = (email, password, datasetUser) => {
   if (validEmail(email) === false || validEmail(password) === false) return false;
@@ -46,8 +47,6 @@ const authenticateUser = (email, password, datasetUser) => {
   const isauthenticateUser = userObject !== undefined;
   return isauthenticateUser;
 };
-
-  
 
 /*
  * ROUTES FOR GET REQUESTS
