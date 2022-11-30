@@ -1,5 +1,12 @@
+const createShortUrl = (datasetUrl, userId, longUrl) => {
+  const newUrlId = generateUrlId();
+  datasetUrl[newUrlId] = { userId, longUrl };
+  return datasetUrl[newUrlId];
+}
+
 const createUser = (datasetUser, id, email, password) => {
   datasetUser[id] = { id, email, password };
+  return datasetUser[id];
 }
 
 const existsUrlId = (urlId, datasetUrl) => {
@@ -146,11 +153,11 @@ const validUserId = (userId) => {
 };
 
 module.exports = {
+  createShortUrl,
   createUser,
   existsUrlId,
   getUserByEmail,
   loggedIn,
-  generateUrlId,
   generateUserId,
   getUrlsByUserId,
   getUserById,

@@ -5,11 +5,11 @@ const morgan = require("morgan");
 const dbUrl = require('./data/url');
 const dbUser = require('./data/user');
 const {
+  createShortUrl,
   createUser,
   existsUrlId,
   getUserByEmail,
   loggedIn,
-  generateUrlId,
   generateUserId,
   getUrlsByUserId,
   getUserById,
@@ -239,11 +239,12 @@ app.post('/register', (req, res) => {
     return res.status(404).send('404 - Not found');
   }
   
+  // TODO: Abstract hashed password generation and newUserId generation to createUser()
   // Hash the password
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
   // Generate a random user id, then record this user in the dataset
   const newUserId = generateUserId();
-  createUser(dbUser, newUserId, submittedEmail, hashedPassword)
+  createUser(dbUser, newUserId, submittedEmail, hashedPassword);
   // Log the new user in, then redirect
   req.session.userId = newUserId;
   return res.redirect('/urls');
@@ -261,10 +262,8 @@ app.post('/urls', (req, res) => {
     return res.status(400).send('400 - It seems you did not provide a valid url');
   };
 
-  // Generate a new UrlId, then record this url in the dataset
-  const newId = generateUrlId();
-  // TODO: abstract url record creation to a helper function
-  dbUrl[newId] = { userId, longUrl: submittedUrl };
+  // Create a new short url record, then redirect to urls/
+  createShortUrl(dbUrl, userId, submittedUrl);
   return res.redirect('/urls');
 });
 
