@@ -30,6 +30,7 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(express.static("public"));
@@ -118,6 +119,7 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
+  // TODO: abstract user auth check and redirect to helper function
   // Redirect if the user is not logged in
   const userId = req.session.userId;
   if (loggedIn(userId, dbUser) === false) {
@@ -240,6 +242,7 @@ app.post('/register', (req, res) => {
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
   // Generate a random user id, then record this user in the dataset
   const newUserId = generateUserId();
+  // TODO: abstract user record creation to a helper function
   dbUser[newUserId] = {
     id: newUserId,
     email: submittedEmail,
@@ -258,7 +261,6 @@ app.post('/urls', (req, res) => {
     return res.redirect('/login');
   }
 
-  // TODO: Validate submitted Url as a Url, handle response if invalid
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
@@ -266,6 +268,7 @@ app.post('/urls', (req, res) => {
 
   // Generate a new UrlId, then record this url in the dataset
   const newId = generateUrlId();
+  // TODO: abstract url record creation to a helper function
   dbUrl[newId] = { userId, longUrl: submittedUrl };
   return res.redirect('/urls');
 });
