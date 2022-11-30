@@ -1,5 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
@@ -66,8 +67,13 @@ const loggedIn = (userId) => {
 const authenticateUser = (email, password) => {
   if (validEmail(email) === false || validEmail(password) === false) return false;
 
+  // Find a user record that matches the provided email and password
   const userObject = Object.values(users)
-    .find(userId => userId.email === email && userId.password === password);
+    .find(userId => userId.email === email && 
+      bcrypt.compareSync(password, userId.password)
+    );
+  
+  // If a user was found, then this user is authenticated
   const isauthenticateUser = userObject !== undefined;
   return isauthenticateUser;
 };
@@ -161,13 +167,13 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: "$2a$10$wLb8tOmKKnVjvcNddhK04uD6NbDsS8ZMY4txGu7t462mK4sdaZDVC",
   },
 
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "$2a$10$uLfto/h81xiPJWcXYRct4uuzz5O51AAXVmGZwP4YQu.aVjsalvfuu",
   },
 
 };
@@ -353,12 +359,14 @@ app.post('/register', (req, res) => {
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
     res.status(404).send('404 - Not found');
   }
-
+  
   // Don't allow a user to register if they already have an account
   if (getUserByEmail(submittedEmail) !== undefined) {
     res.status(404).send('404 - Not found');
   }
-
+  
+  // Hash the password
+  const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
   // Generate a random user id
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
@@ -370,7 +378,7 @@ app.post('/register', (req, res) => {
   users[newUserId] = {
     id: newUserId,
     email: submittedEmail,
-    password: submittedPassword
+    password: hashedPassword,
   };
 
   // Log the new user in, then redirect
