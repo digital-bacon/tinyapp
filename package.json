@@ -4,7 +4,6 @@
   "description": "A URL shortener built with JavaScript",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon -L express_server.js",
     "test": "mocha"
   },
   "repository": {
