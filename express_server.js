@@ -9,6 +9,7 @@ const {
   getUserByEmail,
   loggedIn,
   generateRandomString,
+  generateUrlId,
   getUrlsByUserId,
   getUserById,
   ownsUrlId,
@@ -268,14 +269,9 @@ app.post('/urls', (req, res) => {
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
   };
-  const characterSets = {
-    lowercase: 'abcdefghijklmnopqrstuvwxyz',
-    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    numbers: '0123456789',
-  };
-  
-  const useCharacters = Object.values(characterSets).join('');
-  const newId = generateRandomString(6, useCharacters);
+
+  // Generate a new UrlId, then record this url in the dataset
+  const newId = generateUrlId();
   dbUrl[newId] = { userId, longUrl: submittedUrl };
   return res.redirect('/urls');
 });

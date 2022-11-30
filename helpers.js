@@ -32,6 +32,18 @@ const loggedIn = (userId, datasetUser) => {
   return true;
 };
 
+const generateUrlId = () => {
+  const characterSets = {
+    lowercase: 'abcdefghijklmnopqrstuvwxyz',
+    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    numbers: '0123456789',
+  };
+  
+  const useCharacters = Object.values(characterSets).join('');
+  const newId = generateRandomString(6, useCharacters);
+  return newId;
+}
+
 /**
  * Function that returns a random string of a specified length from a
  * given set of characters
@@ -122,6 +134,7 @@ module.exports = {
   existsUrlId,
   existsUserId,
   generateRandomString,
+  generateUrlId,
   getUserByEmail,
   loggedIn,
   getUrlsByUserId,
