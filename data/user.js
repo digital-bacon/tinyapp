@@ -1,4 +1,5 @@
-const users = {
+module.exports = {
+  
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",

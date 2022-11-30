@@ -1,17 +1,3 @@
-const authenticateUser = (email, password, datasetUser) => {
-  if (validEmail(email) === false || validEmail(password) === false) return false;
-
-  // Find a user record that matches the provided email and password
-  const userObject = Object.values(datasetUser)
-    .find(userId => userId.email === email &&
-      bcrypt.compareSync(password, userId.password)
-    );
-  
-  // If a user was found, then this user is authenticated
-  const isauthenticateUser = userObject !== undefined;
-  return isauthenticateUser;
-};
-
 const existsUrlId = (urlId, datasetUrl) => {
   if (validUrlId(urlId) === false) return false;
 
@@ -34,8 +20,8 @@ const getUserByEmail = (email, datasetUser) => {
 
   userData = Object.values(datasetUser)
     .find(userId => userId.email === email);
-  
-    return userData;
+
+  return userData;
 };
 
 const loggedIn = (userId, datasetUser) => {
@@ -54,7 +40,7 @@ const loggedIn = (userId, datasetUser) => {
  * select random characters
  * @returns {string} A randomized string
  */
- const generateRandomString = (desiredLength = 0, characterSet) => {
+const generateRandomString = (desiredLength = 0, characterSet) => {
   let randomString = '';
   if (desiredLength === 0) return randomString;
   const randomCharacter = characterSet[Math.floor(Math.random() * characterSet.length) + 0];
@@ -69,7 +55,7 @@ const getUrlsByUserId = (userId, datasetUser, datasetUrl) => {
   Object.keys(datasetUrl).forEach(urlId => {
     if (datasetUrl[urlId].userId === userId) {
       const longUrl = datasetUrl[urlId].longUrl;
-      datasetUrl[urlId] = { userId, longUrl };
+      urlData[urlId] = { userId, longUrl };
     }
   });
 
@@ -134,9 +120,9 @@ const validUserId = (userId) => {
 };
 
 module.exports = {
-  authenticateUser,
   existsUrlId,
   existsUserId,
+  generateRandomString,
   getUserByEmail,
   loggedIn,
   getUrlsByUserId,
@@ -146,4 +132,4 @@ module.exports = {
   validPassword,
   validUrlId,
   validUserId
-}
+};

@@ -4,28 +4,20 @@ const bcrypt = require("bcryptjs");
 const dbUrl = require('./data/url');
 const dbUser = require('./data/user');
 const {
-  authenticateUser,
   existsUrlId,
-  existsUserId,
   getUserByEmail,
   loggedIn,
+  generateRandomString,
   getUrlsByUserId,
   getUserById,
   ownsUrlId,
   validEmail,
   validPassword,
-  validUrlId,
-  validUserId
 } = require('./helpers');
 
 const app = express();
 const PORT = 8080;
 
-const breedDetailsFromFile = function(breed, action) {
-  fs.readFile(`./data/${breed}.txt`, 'utf8', (error, data) => {
-      action(data);
-  });
-};
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
@@ -37,7 +29,20 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-console.log(JSON.stringify(dbUrl))
+const authenticateUser = (email, password, datasetUser) => {
+  if (validEmail(email) === false || validEmail(password) === false) return false;
+
+  // Find a user record that matches the provided email and password
+  const userObject = Object.values(datasetUser)
+    .find(userId => userId.email === email &&
+      bcrypt.compareSync(password, userId.password)
+    );
+  
+  // If a user was found, then this user is authenticated
+  const isauthenticateUser = userObject !== undefined;
+  return isauthenticateUser;
+};
+
 
 /*
  * ROUTES FOR GET REQUESTS
@@ -196,7 +201,7 @@ app.post('/login', (req, res) => {
   }
 
   // Authenticate the user
-  if (authenticateUser(submittedEmail, submittedPassword) === false) {
+  if (authenticateUser(submittedEmail, submittedPassword, dbUser) === false) {
     res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
 
@@ -265,7 +270,7 @@ app.post('/urls', (req, res) => {
   
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
-  dbUrl[newId] = submittedUrl;
+  dbUrl[newId] = { userId, longUrl: submittedUrl };
   res.redirect('/urls');
 });
 

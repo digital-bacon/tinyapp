@@ -1,4 +1,5 @@
-const urlDatabase = {
+module.exports = {
+  
   'b2xVn2': {
     userId: 'user2RandomID',
     longUrl: 'http://www.lighthouselabs.ca',
