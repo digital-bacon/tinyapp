@@ -1,5 +1,6 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
+const helpers = require('./helpers');
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
@@ -104,16 +105,6 @@ const getUrlsByUserId = (userId) => {
   });
 
   return urlData;
-};
-
-const getUserByEmail = (email, database) => {
-  let userData;
-  if (validEmail === false) return userData;
-
-  userData = Object.values(database)
-    .find(userId => userId.email === email);
-
-  return userData;
 };
 
 const validEmail = (email) => {
