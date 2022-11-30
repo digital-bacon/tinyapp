@@ -106,11 +106,11 @@ const getUrlsByUserId = (userId) => {
   return urlData;
 };
 
-const getUserByEmail = (email) => {
+const getUserByEmail = (email, database) => {
   let userData;
   if (validEmail === false) return userData;
 
-  userData = Object.values(users)
+  userData = Object.values(database)
     .find(userId => userId.email === email);
 
   return userData;
@@ -346,7 +346,7 @@ app.post('/login', (req, res) => {
   }
 
   // User was authenticated, retrieve user data
-  const userData = getUserByEmail(submittedEmail);
+  const userData = getUserByEmail(submittedEmail, users);
   // Log the user in, then redirect
   req.session.userId = userData.id;
   res.redirect('/urls');
@@ -367,7 +367,7 @@ app.post('/register', (req, res) => {
   }
   
   // Don't allow a user to register if they already have an account
-  if (getUserByEmail(submittedEmail) !== undefined) {
+  if (getUserByEmail(submittedEmail, users) !== undefined) {
     res.status(404).send('404 - Not found');
   }
   
