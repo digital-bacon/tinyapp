@@ -14,6 +14,7 @@ const {
   ownsUrlId,
   validEmail,
   validPassword,
+  validUrl,
 } = require('./helpers');
 
 const app = express();
@@ -265,7 +266,9 @@ app.post('/urls', (req, res) => {
 
   // TODO: Validate submitted Url as a Url, handle response if invalid
   const submittedUrl = req.body.longUrl;
-  // const isValidUrl = (validUrl(submittedUrl));
+  if (validUrl(submittedUrl) === false) {
+    return res.status(400).send('400 - It seems you did not provide a valid url');
+  };
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
     uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',

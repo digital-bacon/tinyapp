@@ -108,6 +108,15 @@ const validUrlId = (shortUrlId) => {
   return true;
 };
 
+const validUrl = (url) => {
+  if (typeof url !== 'string') return false;
+
+  if (url === undefined) return false;
+
+  if (url === '') return false;
+
+  return true;
+};
 
 const validUserId = (userId) => {
   if (typeof userId !== 'string') return false;
@@ -130,6 +139,7 @@ module.exports = {
   ownsUrlId,
   validEmail,
   validPassword,
+  validUrl,
   validUrlId,
   validUserId
 };
