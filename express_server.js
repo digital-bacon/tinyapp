@@ -1,10 +1,31 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
-const helpers = require('./helpers');
 const bcrypt = require("bcryptjs");
+const dbUrl = require('./data/url');
+const dbUser = require('./data/user');
+const {
+  authenticateUser,
+  existsUrlId,
+  existsUserId,
+  getUserByEmail,
+  loggedIn,
+  getUrlsByUserId,
+  getUserById,
+  ownsUrlId,
+  validEmail,
+  validPassword,
+  validUrlId,
+  validUserId
+} = require('./helpers');
+
 const app = express();
 const PORT = 8080;
 
+const breedDetailsFromFile = function(breed, action) {
+  fs.readFile(`./data/${breed}.txt`, 'utf8', (error, data) => {
+      action(data);
+  });
+};
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
@@ -16,55 +37,29 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-const urlDatabase = {
-  'b2xVn2': {
-    userId: 'user2RandomID',
-    longUrl: 'http://www.lighthouselabs.ca',
-  },
-
-  '9sm5xK': {
-    userId: 'user2RandomID',
-    longUrl: 'http://www.google.com',
-  },
-
-};
-
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "$2a$10$wLb8tOmKKnVjvcNddhK04uD6NbDsS8ZMY4txGu7t462mK4sdaZDVC",
-  },
-
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "$2a$10$uLfto/h81xiPJWcXYRct4uuzz5O51AAXVmGZwP4YQu.aVjsalvfuu",
-  },
-
-};
+console.log(JSON.stringify(dbUrl))
 
 /*
  * ROUTES FOR GET REQUESTS
  */
 app.get('/u/:id', (req, res) => {
   const urlId = req.params.id;
-  if (existsUrlId(urlId) === false) {
+  if (existsUrlId(urlId, dbUrl) === false) {
     res.status(404).send('404 - Not found');
   }
 
-  const longUrl = urlDatabase[urlId].longUrl;
+  const longUrl = dbUrl[urlId].longUrl;
   res.redirect(longUrl);
 });
 
 app.get('/urls/new', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === false) {
+  if (loggedIn(userId, dbUser) === false) {
     res.redirect('/login');
   }
 
-  const userData = getUserById(userId);
+  const userData = getUserById(userId, dbUser);
   const templateVars = { userData };
   res.render('urls_new', templateVars);
 });
@@ -72,18 +67,18 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:id', (req, res) => {
   const urlId = req.params.id;
   // Respond with a 404 if the requested ID does not exist
-  if (existsUrlId(urlId) === false) {
+  if (existsUrlId(urlId, dbUrl) === false) {
     res.status(404).send('404 - Not found');
   }
 
   const userId = req.session.userId;
   // Ensure user owns this urlId
-  if (ownsUrlId(urlId, userId) === false) {
+  if (ownsUrlId(urlId, userId, dbUser, dbUrl) === false) {
     res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
 
-  const longUrl = urlDatabase[urlId].longUrl;
-  const userData = getUserById(userId);
+  const longUrl = dbUrl[urlId].longUrl;
+  const userData = getUserById(userId, dbUser);
   const templateVars = { userData, urlId, longUrl };
   res.render('urls_show', templateVars);
 });
@@ -91,11 +86,11 @@ app.get('/urls/:id', (req, res) => {
 app.get('/login', (req, res) => {
   // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === true) {
+  if (loggedIn(userId, dbUser) === true) {
     res.redirect('/urls');
   }
 
-  const userData = getUserById(userId);
+  const userData = getUserById(userId, dbUser);
   const templateVars = { userData };
   res.render('login', templateVars);
 });
@@ -108,11 +103,11 @@ app.get('/logout', (req, res) => {
 app.get('/register', (req, res) => {
   // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === true) {
+  if (loggedIn(userId, dbUser) === true) {
     res.redirect('/urls');
   }
 
-  const userData = getUserById(userId);
+  const userData = getUserById(userId, dbUser);
   const templateVars = { userData };
   res.render('register', templateVars);
 });
@@ -120,12 +115,12 @@ app.get('/register', (req, res) => {
 app.get('/urls', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === false) {
+  if (loggedIn(userId, dbUser) === false) {
     res.redirect('/login');
   }
 
-  const userData = getUserById(userId);
-  const urls = getUrlsByUserId(userId);
+  const userData = getUserById(userId, dbUser);
+  const urls = getUrlsByUserId(userId, dbUser, dbUrl);
   const templateVars = { userData, urls };
   res.render('urls_index', templateVars);
 });
@@ -144,52 +139,52 @@ app.get('/*', (req, res) => {
 app.post('/urls/:id/update', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === false) {
+  if (loggedIn(userId, dbUser) === false) {
     res.redirect('/login');
   }
 
   const urlId = req.params.id;
   // Ensure the requested urlId exists
-  if (existsUrlId(urlId) === false) {
+  if (existsUrlId(urlId, dbUrl) === false) {
     res.status(404).send('404 - Not found');
   }
 
   // Ensure user owns this urlId
-  if (ownsUrlId(urlId, userId) === false) {
+  if (ownsUrlId(urlId, userId, dbUser, dbUrl) === false) {
     res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
 
   const submittedUrl = req.body.longUrl;
-  urlDatabase[urlId].longUrl = submittedUrl;
+  dbUrl[urlId].longUrl = submittedUrl;
   res.redirect('/urls');
 });
 
 app.post('/urls/:id/delete', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === false) {
+  if (loggedIn(userId, dbUser) === false) {
     res.redirect('/login');
   }
 
   const urlId = req.params.id;
   // Ensure the requested urlId exists
-  if (existsUrlId(urlId) === false) {
+  if (existsUrlId(urlId, dbUrl) === false) {
     res.status(404).send('404 - Not found');
   }
 
   // Ensure user owns this urlId
-  if (ownsUrlId(urlId, userId) === false) {
+  if (ownsUrlId(urlId, userId, dbUser, dbUrl) === false) {
     res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
 
-  delete urlDatabase[urlId];
+  delete dbUrl[urlId];
   res.redirect('/urls');
 });
 
 app.post('/login', (req, res) => {
   // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === true) {
+  if (loggedIn(userId, dbUser) === true) {
     res.redirect('/urls');
   }
 
@@ -206,7 +201,7 @@ app.post('/login', (req, res) => {
   }
 
   // User was authenticated, retrieve user data
-  const userData = getUserByEmail(submittedEmail, users);
+  const userData = getUserByEmail(submittedEmail, dbUser);
   // Log the user in, then redirect
   req.session.userId = userData.id;
   res.redirect('/urls');
@@ -215,7 +210,7 @@ app.post('/login', (req, res) => {
 app.post('/register', (req, res) => {
   // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === true) {
+  if (loggedIn(userId, dbUser) === true) {
     res.redirect('/urls');
   }
 
@@ -227,7 +222,7 @@ app.post('/register', (req, res) => {
   }
   
   // Don't allow a user to register if they already have an account
-  if (getUserByEmail(submittedEmail, users) !== undefined) {
+  if (getUserByEmail(submittedEmail, dbUser) !== undefined) {
     res.status(404).send('404 - Not found');
   }
   
@@ -241,7 +236,7 @@ app.post('/register', (req, res) => {
 
   const useCharacters = Object.values(characterSets).join('');
   const newUserId = generateRandomString(5, useCharacters);
-  users[newUserId] = {
+  dbUser[newUserId] = {
     id: newUserId,
     email: submittedEmail,
     password: hashedPassword,
@@ -255,7 +250,7 @@ app.post('/register', (req, res) => {
 app.post('/urls', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId) === false) {
+  if (loggedIn(userId, dbUser) === false) {
     res.redirect('/login');
   }
 
@@ -270,7 +265,7 @@ app.post('/urls', (req, res) => {
   
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
-  urlDatabase[newId] = submittedUrl;
+  dbUrl[newId] = submittedUrl;
   res.redirect('/urls');
 });
 

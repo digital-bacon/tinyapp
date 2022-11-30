@@ -1,8 +1,8 @@
-const authenticateUser = (email, password) => {
+const authenticateUser = (email, password, datasetUser) => {
   if (validEmail(email) === false || validEmail(password) === false) return false;
 
   // Find a user record that matches the provided email and password
-  const userObject = Object.values(users)
+  const userObject = Object.values(datasetUser)
     .find(userId => userId.email === email &&
       bcrypt.compareSync(password, userId.password)
     );
@@ -12,36 +12,36 @@ const authenticateUser = (email, password) => {
   return isauthenticateUser;
 };
 
-const existsUrlId = (urlId) => {
+const existsUrlId = (urlId, datasetUrl) => {
   if (validUrlId(urlId) === false) return false;
 
-  if (urlDatabase[urlId] === undefined) return false;
+  if (datasetUrl[urlId] === undefined) return false;
 
   return true;
 };
 
-const existsUserId = (userId) => {
+const existsUserId = (userId, datasetUser) => {
   if (validUserId(userId) === false) return false;
 
-  if (users[userId] === undefined) return false;
+  if (datasetUser[userId] === undefined) return false;
 
   return true;
 };
 
-const getUserByEmail = (email, database) => {
+const getUserByEmail = (email, datasetUser) => {
   let userData;
   if (validEmail === false) return userData;
 
-  userData = Object.values(database)
+  userData = Object.values(datasetUser)
     .find(userId => userId.email === email);
   
     return userData;
 };
 
-const loggedIn = (userId) => {
+const loggedIn = (userId, datasetUser) => {
   if (validUserId(userId) === false) return false;
 
-  if (users[userId] === undefined) return false;
+  if (datasetUser[userId] === undefined) return false;
   
   return true;
 };
@@ -62,32 +62,32 @@ const loggedIn = (userId) => {
   return randomString;
 };
 
-const getUrlsByUserId = (userId) => {
-  if (existsUserId(userId) === false) return undefined;
+const getUrlsByUserId = (userId, datasetUser, datasetUrl) => {
+  if (existsUserId(userId, datasetUser) === false) return undefined;
   
   const urlData = {};
-  Object.keys(urlDatabase).forEach(urlId => {
-    if (urlDatabase[urlId].userId === userId) {
-      const longUrl = urlDatabase[urlId].longUrl;
-      urlData[urlId] = { userId, longUrl };
+  Object.keys(datasetUrl).forEach(urlId => {
+    if (datasetUrl[urlId].userId === userId) {
+      const longUrl = datasetUrl[urlId].longUrl;
+      datasetUrl[urlId] = { userId, longUrl };
     }
   });
 
   return urlData;
 };
 
-const getUserById = (userId) => {
+const getUserById = (userId, datasetUser) => {
   let userData;
-  if (existsUserId(userId) === false) return userData;
+  if (existsUserId(userId, datasetUser) === false) return userData;
 
-  userData = users[userId];
+  userData = datasetUser[userId];
   return userData;
 };
 
-const ownsUrlId = (urlId, userId) => {
-  if (existsUrlId(urlId) === false || existsUserId(userId) === false) return false;
+const ownsUrlId = (urlId, userId, datasetUser, datasetUrl) => {
+  if (existsUrlId(urlId, datasetUrl) === false || existsUserId(userId, datasetUser) === false) return false;
   
-  if (urlDatabase[urlId].userId !== userId) return false;
+  if (datasetUrl[urlId].userId !== userId) return false;
 
   return true;
 };
