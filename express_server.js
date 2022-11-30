@@ -86,8 +86,8 @@ const getUrlsByUserId = (userId) => {
   const urlData = {};
   Object.keys(urlDatabase).forEach(urlId => {
     if (urlDatabase[urlId].userId === userId) {
-      const longUrl = urlDatabase[urlId].longUrl
-      urlData[urlId] = { userId, longUrl }
+      const longUrl = urlDatabase[urlId].longUrl;
+      urlData[urlId] = { userId, longUrl };
     }
   });
 
