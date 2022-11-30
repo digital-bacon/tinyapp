@@ -44,6 +44,17 @@ const generateUrlId = () => {
   return newId;
 }
 
+const generateUserId = () => {
+  const characterSets = {
+    lowercase: 'abcdefghijklmnopqrstuvwxyz',
+    numbers: '0123456789',
+  };
+
+  const useCharacters = Object.values(characterSets).join('');
+  const newUserId = generateRandomString(5, useCharacters);
+  return newUserId;
+}
+
 /**
  * Function that returns a random string of a specified length from a
  * given set of characters
@@ -132,17 +143,14 @@ const validUserId = (userId) => {
 
 module.exports = {
   existsUrlId,
-  existsUserId,
-  generateRandomString,
-  generateUrlId,
   getUserByEmail,
   loggedIn,
+  generateUrlId,
+  generateUserId,
   getUrlsByUserId,
   getUserById,
   ownsUrlId,
   validEmail,
   validPassword,
   validUrl,
-  validUrlId,
-  validUserId
 };

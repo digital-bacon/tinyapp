@@ -8,8 +8,8 @@ const {
   existsUrlId,
   getUserByEmail,
   loggedIn,
-  generateRandomString,
   generateUrlId,
+  generateUserId,
   getUrlsByUserId,
   getUserById,
   ownsUrlId,
@@ -238,14 +238,8 @@ app.post('/register', (req, res) => {
   
   // Hash the password
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
-  // Generate a random user id
-  const characterSets = {
-    lowercase: 'abcdefghijklmnopqrstuvwxyz',
-    numbers: '0123456789',
-  };
-
-  const useCharacters = Object.values(characterSets).join('');
-  const newUserId = generateRandomString(5, useCharacters);
+  // Generate a random user id, then record this user in the dataset
+  const newUserId = generateUserId();
   dbUser[newUserId] = {
     id: newUserId,
     email: submittedEmail,
