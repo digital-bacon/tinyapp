@@ -1,3 +1,7 @@
+const createUser = (datasetUser, id, email, password) => {
+  datasetUser[id] = { id, email, password };
+}
+
 const existsUrlId = (urlId, datasetUrl) => {
   if (validUrlId(urlId) === false) return false;
 
@@ -142,6 +146,7 @@ const validUserId = (userId) => {
 };
 
 module.exports = {
+  createUser,
   existsUrlId,
   getUserByEmail,
   loggedIn,

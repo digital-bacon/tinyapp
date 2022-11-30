@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const dbUrl = require('./data/url');
 const dbUser = require('./data/user');
 const {
+  createUser,
   existsUrlId,
   getUserByEmail,
   loggedIn,
@@ -242,13 +243,7 @@ app.post('/register', (req, res) => {
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
   // Generate a random user id, then record this user in the dataset
   const newUserId = generateUserId();
-  // TODO: abstract user record creation to a helper function
-  dbUser[newUserId] = {
-    id: newUserId,
-    email: submittedEmail,
-    password: hashedPassword,
-  };
-
+  createUser(dbUser, newUserId, submittedEmail, hashedPassword)
   // Log the new user in, then redirect
   req.session.userId = newUserId;
   return res.redirect('/urls');
