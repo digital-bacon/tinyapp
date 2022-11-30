@@ -104,11 +104,6 @@ app.get('/login', (req, res) => {
   return res.render('login', templateVars);
 });
 
-app.get('/logout', (req, res) => {
-  req.session = null;
-  return res.redirect('/login');
-});
-
 app.get('/register', (req, res) => {
   // Redirect if the user is already logged in
   const userId = req.session.userId;
@@ -214,6 +209,11 @@ app.post('/login', (req, res) => {
   // Log the user in, then redirect
   req.session.userId = userData.id;
   return res.redirect('/urls');
+});
+
+app.post('/logout', (req, res) => {
+  req.session = null;
+  return res.redirect('/login');
 });
 
 app.post('/register', (req, res) => {

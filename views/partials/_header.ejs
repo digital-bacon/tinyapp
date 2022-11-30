@@ -21,7 +21,9 @@
       <div class="mx-3">
         <p class="m-0">Logged in as, <span class="font-weight-bold"><%= userData.email %></span></p>
       </div>
-      <a href="/logout" class="btn btn-warning" title="Logout of your TinyApp account">Logout</a>
+      <form method="post" action="/logout">
+        <button type="submit" class="btn btn-warning">Logout</button>
+      </form>
       <% } else { %>
       <div class="mx-3">
         <a href="/login" title="Log in to your account" class="btn btn-link my-2 my-sm-0 text-light">Log in</a>
