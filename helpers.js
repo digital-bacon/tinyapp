@@ -81,8 +81,6 @@ const ownsUrlId = (urlId, userId, datasetUser, datasetUrl) => {
 const validEmail = (email) => {
   if (typeof email !== 'string') return false;
 
-  if (email === undefined) return false;
-
   if (email === '') return false;
 
   return true;
@@ -90,8 +88,6 @@ const validEmail = (email) => {
 
 const validPassword = (password) => {
   if (typeof password !== 'string') return false;
-
-  if (password === undefined) return false;
 
   if (password === '') return false;
 
@@ -101,8 +97,6 @@ const validPassword = (password) => {
 const validUrlId = (shortUrlId) => {
   if (typeof shortUrlId !== 'string') return false;
 
-  if (shortUrlId === undefined) return false;
-
   if (shortUrlId === '') return false;
 
   return true;
@@ -111,8 +105,6 @@ const validUrlId = (shortUrlId) => {
 const validUrl = (url) => {
   if (typeof url !== 'string') return false;
 
-  if (url === undefined) return false;
-
   if (url === '') return false;
 
   return true;
@@ -120,8 +112,6 @@ const validUrl = (url) => {
 
 const validUserId = (userId) => {
   if (typeof userId !== 'string') return false;
-
-  if (userId === undefined) return false;
 
   if (userId === '') return false;
 
