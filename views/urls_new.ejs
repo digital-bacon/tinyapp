@@ -14,22 +14,7 @@
     <%- include('partials/_header') %>
 
     <main style="margin: 1em;">
-      <h3>Create TinyURL</h3>
-      <form class="form-inline" action="/urls" method="POST">
-        <div class="form-group mb-2">
-          <label for="longUrl">Enter a URL:</label>
-          <input
-            class="form-control"
-            type="url"
-            name="longUrl"
-            placeholder="http://"
-            pattern="https://.*|http://.*"
-            required
-            style="width: 300px; margin: 1em"
-          />
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </div>
-      </form>
+      <%- include('partials/_form_create_url') %>
     </main>
     <%- include('partials/_bootstrapJS') %>
   </body>

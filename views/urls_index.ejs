@@ -12,34 +12,13 @@
   <body>
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
-      <h3>My URLs</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Short URL ID</th>
-            <th scope="col">Long URL</th>
-            <th scope="col" class="text-center">Update</th>
-            <th scope="col" class="text-center">Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% for (const urlId in urls) { %>
-            <tr>
-              <td><%= urlId %></td>
-              <td><%= urls[urlId].longUrl %></td>
-              <td class="text-center">
-                <a href="urls/<%= urlId %>" title="<%= urls[urlId] %>" class="btn btn-outline-primary">Edit</a> 
-              </td>
-              <td class="text-center">
-                <form method="POST" action="/urls/<%= urlId %>/delete">
-                  <input type="submit" id="delete-<%= urlId %>" name="delete-<%= urlId %>" class="btn btn-outline-danger" value="Delete">
-                  <input type="hidden" name="urlId" value="<%= urlId %>">
-                </form>
-              </td>
-            </tr>
-          <% } %>
-        </tbody>
-      </table>
+    <h3>My URLs</h3>
+    <% if (Object.keys(urls).length > 0) { %>
+      <%- include('partials/_list_urls') %>
+    <% } else { %>
+    <p>You don't have any URLs.</p>
+    <a href="/urls/new" title="Create a new shortened url" class="btn btn-primary">Create new URL</a>
+    <% } %>
     </main>
     <%- include('partials/_bootstrapJS') %>
   </body>

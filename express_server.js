@@ -125,6 +125,7 @@ app.get('/urls', (req, res) => {
   const userData = getUserById(userId, dbUser);
   const urls = getUrlsByUserId(userId, dbUser, dbUrl);
   const templateVars = { userData, urls };
+  console.log(urls)
   return res.render('urls_index', templateVars);
 });
 
