@@ -105,7 +105,7 @@ const filterUrls = (key, value, datasetUrl) => {
     if (datasetUrl[urlId][key] === value) {
       urlData[urlId] = {
         userId: datasetUrl[urlId].userId,
-        email: datasetUrl[urlId].longUrl,
+        longUrl: datasetUrl[urlId].longUrl,
       };
     }
   });
