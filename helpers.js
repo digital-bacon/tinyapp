@@ -96,6 +96,22 @@ const getUrlsByUserId = (userId, datasetUrl) => {
   return urlData;
 };
 
+const filterUrls = (key, value, datasetUrl) => {
+  const urlData = {};
+  if (typeof key !== 'string') return urlData;
+  if (key === '') return urlData;
+  if (typeof datasetUrl !== 'object') return urlData;
+  Object.keys(datasetUrl).forEach(urlId => {
+    if (datasetUrl[urlId][key] === value) {
+      urlData[urlId] = {
+        userId: datasetUrl[urlId].userId,
+        email: datasetUrl[urlId].longUrl,
+      };
+    }
+  });
+  return urlData;
+};
+
 const filterUsers = (key, value, datasetUser) => {
   const userData = {};
   if (typeof key !== 'string') return userData;
@@ -168,6 +184,7 @@ module.exports = {
   existsUrlId,
   getUserByEmail,
   getUrlsByUserId,
+  filterUrls,
   filterUsers,
   ownsUrlId,
   validEmail,

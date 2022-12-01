@@ -10,6 +10,7 @@ const {
   existsUrlId,
   getUserByEmail,
   getUrlsByUserId,
+  filterUrls,
   filterUsers,
   ownsUrlId,
   validEmail,
@@ -104,7 +105,7 @@ app.get('/urls', (req, res) => {
     return res.redirect('/login');
   }
 
-  const urls = getUrlsByUserId(userId, dbUrl);
+  const urls = filterUrls('userId', userId, dbUrl);
   const templateVars = { urls, userData: userData[userId] };
   return res.render('urls_index', templateVars);
 });
