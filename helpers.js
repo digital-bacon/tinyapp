@@ -182,8 +182,6 @@ module.exports = {
   createShortUrl,
   createUser,
   existsUrlId,
-  getUserByEmail,
-  getUrlsByUserId,
   filterUrls,
   filterUsers,
   ownsUrlId,

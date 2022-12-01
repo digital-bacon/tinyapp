@@ -8,8 +8,6 @@ const {
   createShortUrl,
   createUser,
   existsUrlId,
-  getUserByEmail,
-  getUrlsByUserId,
   filterUrls,
   filterUsers,
   ownsUrlId,
@@ -25,7 +23,11 @@ app.set('view engine', 'ejs');
 
 app.use(cookieSession({
   name: 'session',
-  keys: ['key1', 'key2'],
+  keys: [
+    '0MbFr6DEq2YyJpaQQhRfpQua5jQYpXa3vHLeMDET677s7TujQagyjoQZRb',
+    '6nWCmHRRwz8yQkMTLwNsR5HrR2AdW09QLYDuCPs52VxXKbGG8fmmjWZgPCFafkAJCqHXXuoKYkPsHn',
+    '3R51n4DqTiAkiGHpLmPfNqrNB0o6C1C2ec9m4iX'
+  ],
   
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -176,14 +178,10 @@ app.post('/login', (req, res) => {
   
   const errMessage = '403 - Forbidden. We could not authenticate you with the provided credentials.';
   // Retrieve user record
-  const userData = filterUsers('email', submittedEmail, dbUser);
-  if (userData.id === undefined) {
-    return res.status(403).send(errMessage);
-  }
-
-  const storedEmail = userData.email;
-  const isAuthenticatedEmail = submittedEmail === storedEmail;
-  if (isAuthenticatedEmail === false) {
+  const userResults = filterUsers('email', submittedEmail, dbUser);
+  const userId = Object.keys(userResults)[0];
+  const userData = dbUser[userId];
+  if (userData === undefined) {
     return res.status(403).send(errMessage);
   }
 
@@ -219,7 +217,8 @@ app.post('/register', (req, res) => {
   }
   
   // Don't allow a user to register if they already have an account
-  if (getUserByEmail(submittedEmail, dbUser) !== undefined) {
+  const foundAccount = filterUsers('email', submittedEmail, dbUser);
+  if (Object.keys(foundAccount).length > 0) {
     return res.status(404).send('404 - Not found');
   }
   
