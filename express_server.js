@@ -36,17 +36,17 @@ app.use(morgan('dev'));
 app.use(express.static("public"));
 
 const authenticateUser = (email, password, datasetUser) => {
-  if (validEmail(email) === false || validEmail(password) === false) return false;
-  
+  if (typeof email !== 'string' || typeof password !== 'string') return false;
+  if (email === '' || password === '') return false;
   // Find a user record that matches the provided email and password
   const userObject = Object.values(datasetUser)
     .find(userId => userId.email === email &&
-      bcrypt.compareSync(password, userId.password)
+      userId.password === password
       );
 
   // If a user was found, then this user is authenticated
-  const isauthenticateUser = userObject !== undefined;
-  return isauthenticateUser;
+  const isAuthenticated = userObject !== undefined;
+  return isAuthenticated;
 };
 
 const redirectUnauthorized = (res, userId, datasetUser, path) => {
@@ -125,7 +125,6 @@ app.get('/urls', (req, res) => {
   const userData = getUserById(userId, dbUser);
   const urls = getUrlsByUserId(userId, dbUser, dbUrl);
   const templateVars = { userData, urls };
-  console.log(urls)
   return res.render('urls_index', templateVars);
 });
 
@@ -188,7 +187,8 @@ app.post('/login', (req, res) => {
   }
 
   // Authenticate the user
-  if (authenticateUser(submittedEmail, submittedPassword, dbUser) === false) {
+  const hashedPassword = bcrypt.compareSync(password, submittedPassword);
+  if (authenticateUser(submittedEmail, hashedPassword, dbUser) === false) {
     return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
 
