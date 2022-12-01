@@ -40,17 +40,16 @@ app.use(cookieSession({
 }));
 
 const authorize = (req, res, next) => {
-  let loggedIn = false;
   const userId = req.session.userId;
-  if (userId !== undefined) {
-    const userData = filterUsers('id', userId, dbUser);
-    if (userData[userId] !== undefined) {
-      loggedIn = true;
-    }
-  }
-  if (loggedIn === false) {
+  if (userId === undefined) {
     return res.redirect('/login');
   }
+
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+  
   next();
 };
 
@@ -104,7 +103,7 @@ app.get('/urls/:id', authorize, (req, res) => {
 
   // Ensure user owns this urlId
   if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
   }
 
   const longUrl = urlData.longUrl;
@@ -123,7 +122,7 @@ app.get('/u/:id', authorize, (req, res) => {
 
   // Ensure user owns this urlId
   if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
   }
 
   const longUrl = urlData.longUrl;
@@ -149,7 +148,7 @@ app.post('/login', (req, res) => {
     return res.status(404).send('404 - Not found');
   }
   
-  const errMessage = '403 - Forbidden. We could not authenticate you with the provided credentials.';
+  const errMessage = '401 - Unauthorized. We could not authenticate you with the provided credentials.';
   // Retrieve user record
   const userResults = filterUsers('email', submittedEmail, dbUser);
   const userId = Object.keys(userResults)[0];
@@ -244,7 +243,7 @@ app.post('/urls/:id/update', authorize, (req, res) => {
   
   // Ensure user owns this urlId
   if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
   }
   
   dbUrl[urlId].longUrl = submittedUrl;
@@ -263,7 +262,7 @@ app.post('/urls/:id/delete', authorize, (req, res) => {
 
   // Ensure user owns this urlId
   if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
   }
 
   delete dbUrl[urlId];
