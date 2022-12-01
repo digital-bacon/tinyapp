@@ -40,6 +40,71 @@ app.use(express.static("public"));
 /*
  * ROUTES FOR GET REQUESTS
  */
+app.get('/login', (req, res) => {
+  return res.render('login', {});
+});
+
+app.get('/register', (req, res) => {
+  // Authorize user, redirect if already logged in
+  const userId = req.session.userId;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] !== undefined) {
+    return res.redirect('/login');
+  }
+
+  return res.render('register', {});
+});
+
+app.get('/urls/new', (req, res) => {
+  // Authorize user
+  const userId = req.session.userId;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
+  const templateVars = { userData: userData[userId] };
+  return res.render('urls_new', templateVars);
+});
+
+app.get('/urls', (req, res) => {
+  // Authorize user
+  const userId = req.session.userId;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
+  const urls = filterUrls('userId', userId, dbUrl);
+  const templateVars = { urls, userData: userData[userId] };
+  return res.render('urls_index', templateVars);
+});
+
+app.get('/urls/:id', (req, res) => {
+  // Authorize user, redirect if not logged in
+  const userId = req.session.userId;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
+  const urlId = req.params.id;
+  // Ensure the requested urlId exists
+  const urlData = dbUrl[urlId];
+  if (urlData === undefined) {
+    return res.status(404).send('404 - Not found');
+  }
+
+  // Ensure user owns this urlId
+  if (urlData.userId !== userId) {
+    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+  }
+
+  const longUrl = urlData.longUrl;
+  const templateVars = { userData: userData[userId], urlId, longUrl };
+  return res.render('urls_show', templateVars);
+});
+
 app.get('/u/:id', (req, res) => {
   // Authorize user, redirect if not logged in
   const userId = req.session.userId;
@@ -64,71 +129,6 @@ app.get('/u/:id', (req, res) => {
   return res.redirect(longUrl);
 });
 
-app.get('/urls/new', (req, res) => {
-  // Authorize user
-  const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] === undefined) {
-    return res.redirect('/login');
-  }
-
-  const templateVars = { userData };
-  return res.render('urls_new', templateVars);
-});
-
-app.get('/urls/:id', (req, res) => {
-  // Authorize user, redirect if not logged in
-  const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] === undefined) {
-    return res.redirect('/login');
-  }
-
-  const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
-  }
-
-  const longUrl = urlData.longUrl;
-  const templateVars = { userData, urlId, longUrl };
-  return res.render('urls_show', templateVars);
-});
-
-app.get('/login', (req, res) => {
-  return res.render('login', {});
-});
-
-app.get('/register', (req, res) => {
-  // Authorize user, redirect if already logged in
-  const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] !== undefined) {
-    return res.redirect('/login');
-  }
-
-  return res.render('register', {});
-});
-
-app.get('/urls', (req, res) => {
-  // Authorize user
-  const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] === undefined) {
-    return res.redirect('/login');
-  }
-
-  const urls = filterUrls('userId', userId, dbUrl);
-  const templateVars = { urls, userData: userData[userId] };
-  return res.render('urls_index', templateVars);
-});
-
 app.get('/', (req, res) => {
   return res.redirect('/urls');
 });
@@ -140,54 +140,6 @@ app.get('/*', (req, res) => {
 /*
  * ROUTES FOR POST REQUESTS
  */
-app.post('/urls/:id/update', (req, res) => {
-  // TODO: validate url input as a url
-  const userId = req.session.userId;
-  if (filterUsers('id', userId, dbUser) === undefined) {
-    return res.redirect('/login');
-  }
-
-  const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
-  }
-
-  const submittedUrl = req.body.longUrl;
-  dbUrl[urlId].longUrl = submittedUrl;
-  return res.redirect('/urls');
-});
-
-app.post('/urls/:id/delete', (req, res) => {
-  // Authorize user
-  const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] === undefined) {
-    return res.redirect('/login');
-  }
-
-  const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
-  }
-
-  delete dbUrl[urlId];
-  return res.redirect('/urls');
-});
-
 app.post('/login', (req, res) => {
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
@@ -249,7 +201,6 @@ app.post('/register', (req, res) => {
   if (newUser === undefined) {
     return res.status(500).send('500 - Internal Server Error');
   }
-
   // Log the new user in, then redirect
   req.session.userId = newUser.id;
   return res.redirect('/urls');
@@ -279,4 +230,52 @@ app.post('/urls', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}`);
+});
+
+app.post('/urls/:id/update', (req, res) => {
+  // TODO: validate url input as a url
+  const userId = req.session.userId;
+  if (filterUsers('id', userId, dbUser) === undefined) {
+    return res.redirect('/login');
+  }
+
+  const urlId = req.params.id;
+  // Ensure the requested urlId exists
+  const urlData = dbUrl[urlId];
+  if (urlData === undefined) {
+    return res.status(404).send('404 - Not found');
+  }
+
+  // Ensure user owns this urlId
+  if (urlData.userId !== userId) {
+    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+  }
+
+  const submittedUrl = req.body.longUrl;
+  dbUrl[urlId].longUrl = submittedUrl;
+  return res.redirect('/urls');
+});
+
+app.post('/urls/:id/delete', (req, res) => {
+  // Authorize user
+  const userId = req.session.userId;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
+  const urlId = req.params.id;
+  // Ensure the requested urlId exists
+  const urlData = dbUrl[urlId];
+  if (urlData === undefined) {
+    return res.status(404).send('404 - Not found');
+  }
+
+  // Ensure user owns this urlId
+  if (urlData.userId !== userId) {
+    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+  }
+
+  delete dbUrl[urlId];
+  return res.redirect('/urls');
 });

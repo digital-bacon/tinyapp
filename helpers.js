@@ -1,14 +1,24 @@
 const createShortUrl = (datasetUrl, userId, longUrl) => {
+  if (typeof userId !== 'string') return;
+  if (typeof longUrl !== 'string') return;
+  if (userId === '') return false;
+  if (longUrl === '') return false;
+  if (typeof datasetUrl !== 'object') return
   const newUrlId = generateUrlId();
   datasetUrl[newUrlId] = { userId, longUrl };
   return datasetUrl[newUrlId];
 }
 
 const createUser = (datasetUser, email, password) => {
-  const userId = generateUserId();
-  if (datasetUser[userId] !== undefined) return undefined;
-  datasetUser[userId] = { userId, email, password };
-  return datasetUser[userId];
+  if (typeof email !== 'string') return;
+  if (typeof password !== 'string') return;
+  if (email === '') return false;
+  if (password === '') return false;
+  if (typeof datasetUser !== 'object') return
+  const id = generateUserId();
+  if (datasetUser[id] !== undefined) return;
+  datasetUser[id] = { id, email, password };
+  return datasetUser[id];
 }
 
 const existsUrlId = (urlId, datasetUrl) => {
