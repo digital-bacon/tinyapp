@@ -36,7 +36,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(express.static("public"));
 
-
 const authenticateUser = (email, password, datasetUser) => {
   if (validEmail(email) === false || validEmail(password) === false) return false;
   
@@ -49,6 +48,13 @@ const authenticateUser = (email, password, datasetUser) => {
   // If a user was found, then this user is authenticated
   const isauthenticateUser = userObject !== undefined;
   return isauthenticateUser;
+};
+
+const redirectUnauthorized = (res, userId, datasetUser, path) => {
+  if (loggedIn(userId, dbUser) === false) {
+    res.redirect(path);
+    return true;
+  }
 };
 
 /*
@@ -67,10 +73,7 @@ app.get('/u/:id', (req, res) => {
 app.get('/urls/new', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === false) {
-    return res.redirect('/login');
-  }
-
+  redirectUnauthorized(res, userId, dbUser, '/login');
   const userData = getUserById(userId, dbUser);
   const templateVars = { userData };
   return res.render('urls_new', templateVars);
@@ -123,10 +126,7 @@ app.get('/urls', (req, res) => {
   // TODO: abstract user auth check and redirect to helper function
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === false) {
-    return res.redirect('/login');
-  }
-
+  if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
   const userData = getUserById(userId, dbUser);
   const urls = getUrlsByUserId(userId, dbUser, dbUrl);
   const templateVars = { userData, urls };
@@ -147,10 +147,7 @@ app.get('/*', (req, res) => {
 app.post('/urls/:id/update', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === false) {
-    return res.redirect('/login');
-  }
-
+  redirectUnauthorized(res, userId, dbUser, '/login');
   const urlId = req.params.id;
   // Ensure the requested urlId exists
   if (existsUrlId(urlId, dbUrl) === false) {
@@ -170,10 +167,7 @@ app.post('/urls/:id/update', (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === false) {
-    return res.redirect('/login');
-  }
-
+  redirectUnauthorized(res, userId, dbUser, '/login');
   const urlId = req.params.id;
   // Ensure the requested urlId exists
   if (existsUrlId(urlId, dbUrl) === false) {
@@ -253,10 +247,7 @@ app.post('/register', (req, res) => {
 app.post('/urls', (req, res) => {
   // Redirect if the user is not logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === false) {
-    return res.redirect('/login');
-  }
-
+  redirectUnauthorized(res, userId, dbUser, '/login');
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
