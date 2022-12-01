@@ -53,6 +53,29 @@ const authorize = (req, res, next) => {
   next();
 };
 
+const urlMustExist = (req, res, next) => {
+  const urlId = req.params.id;
+  // Ensure the requested urlId exists
+  const urlData = dbUrl[urlId];
+  if (urlData === undefined) {
+    return res.status(404).send('404 - Not found');
+  }
+  
+  next();
+};
+
+const userMustOwnUrl = (req, res, next) => {
+  const userId = req.session.userId;
+  const urlId = req.params.id;
+  // Ensure user owns this urlId
+  const urlData = dbUrl[urlId];
+  if (urlData.userId !== userId) {
+    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
+  }
+  
+  next();
+};
+
 /*
  * ROUTES FOR GET REQUESTS
  */
@@ -65,67 +88,38 @@ app.get('/register', (req, res) => {
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] !== undefined) {
-    return res.redirect('/login');
+    return res.redirect('/urls');
   }
 
   return res.render('register', {});
 });
 
-app.get('/urls/new', (req, res) => {
-  // Authorize user, redirect if not logged in
+app.get('/urls/new', authorize, (req, res) => {
   const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] === undefined) {
-    return res.redirect('/login');
-  }
-
+  const userData = dbUser[userId];
   const templateVars = { userData: userData[userId] };
   return res.render('urls_new', templateVars);
 });
 
 app.get('/urls', authorize, (req, res) => {
   const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
+  const userData = dbUser[userId];
   const urls = filterUrls('userId', userId, dbUrl);
-  const templateVars = { urls, userData: userData[userId] };
+  const templateVars = { urls, userData };
   return res.render('urls_index', templateVars);
 });
 
-app.get('/urls/:id', authorize, (req, res) => {
+app.get('/urls/:id', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
   const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
+  const userData = dbUser[userId];
   const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
-  }
-
-  const longUrl = urlData.longUrl;
-  const templateVars = { userData: userData[userId], urlId, longUrl };
+  const longUrl = dbUrl[req.params.id].longUrl;
+  const templateVars = { userData, urlId, longUrl };
   return res.render('urls_show', templateVars);
 });
 
-app.get('/u/:id', authorize, (req, res) => {
-  const userId = req.session.userId;
-  const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
-  }
-
-  const longUrl = urlData.longUrl;
+app.get('/u/:id', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
+  const longUrl = dbUrl[req.params.id].longUrl;
   return res.redirect(longUrl);
 });
 
@@ -174,7 +168,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  // Authorize user, redirect if already logged in
+  // Redirect if already logged in
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] !== undefined) {
@@ -209,13 +203,12 @@ app.post('/register', (req, res) => {
 
 app.post('/urls', authorize, (req, res) => {
   const userId = req.session.userId;
-  // Validate the submitted url
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
   }
 
-  // Create a new short url record, then redirect to urls/
+  // Create a new short url record
   const newUrl = createShortUrl(dbUrl, userId, submittedUrl);
   // If a URL wasn't returned, return a server error
   if (newUrl === undefined) {
@@ -224,47 +217,18 @@ app.post('/urls', authorize, (req, res) => {
   return res.redirect('/urls');
 });
 
-app.post('/urls/:id/update', authorize, (req, res) => { 
-  // Authorize user, redirect if not logged in
-  const userId = req.session.userId;
-  
-  // Validate the submitted url
+app.post('/urls/:id/update', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
   }
-
   const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-  
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
-  }
-  
   dbUrl[urlId].longUrl = submittedUrl;
   return res.redirect('/urls');
 });
 
-app.post('/urls/:id/delete', authorize, (req, res) => {
-  // Authorize user, redirect if not logged in
-  const userId = req.session.userId;
+app.post('/urls/:id/delete', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
   const urlId = req.params.id;
-  // Ensure the requested urlId exists
-  const urlData = dbUrl[urlId];
-  if (urlData === undefined) {
-    return res.status(404).send('404 - Not found');
-  }
-
-  // Ensure user owns this urlId
-  if (urlData.userId !== userId) {
-    return res.status(403).send('403 - Forbidden. You are not authorized to make that request.');
-  }
-
   delete dbUrl[urlId];
   return res.redirect('/urls');
 });
