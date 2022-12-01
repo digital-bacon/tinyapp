@@ -17,7 +17,7 @@
         <a class="nav-item nav-link text-light" href="/urls">My URLs</a>
         <a class="nav-item nav-link text-light" href="/urls/new">Create New URL</a>
       </ul>
-      <% if (userData !== undefined) { %>
+      <% if (typeof userData !== 'undefined') { %>
       <div class="mx-3">
         <p class="m-0">Logged in as, <span class="font-weight-bold"><%= userData.email %></span></p>
       </div>

@@ -19,11 +19,10 @@ const existsUrlId = (urlId, datasetUrl) => {
 };
 
 const existsUserId = (userId, datasetUser) => {
-  if (validUserId(userId) === false) return false;
-
+  if (typeof userId !== 'string') return false;
+  if (userId === '') return false;
   if (datasetUser[userId] === undefined) return false;
-
-  return true;
+  return false;
 };
 
 const getUserByEmail = (email, datasetUser) => {
@@ -83,41 +82,51 @@ const generateRandomString = (desiredLength = 0, characterSet) => {
   return randomString;
 };
 
-const getUrlsByUserId = (userId, datasetUser, datasetUrl) => {
-  if (existsUserId(userId, datasetUser) === false) return undefined;
-  
+const getUrlsByUserId = (userId, datasetUrl) => {
   const urlData = {};
   Object.keys(datasetUrl).forEach(urlId => {
     if (datasetUrl[urlId].userId === userId) {
-      const longUrl = datasetUrl[urlId].longUrl;
-      urlData[urlId] = { userId, longUrl };
+      urlData[urlId] = {
+        userId,
+        longUrl: datasetUrl[urlId].longUrl,
+      };
     }
   });
 
   return urlData;
 };
 
-const getUserById = (userId, datasetUser) => {
-  let userData;
-  if (existsUserId(userId, datasetUser) === false) return userData;
-
-  userData = datasetUser[userId];
+const filterUsers = (key, value, datasetUser) => {
+  const userData = {};
+  if (typeof key !== 'string') return userData;
+  if (key === '') return userData;
+  if (typeof datasetUser !== 'object') return userData;
+  Object.keys(datasetUser).forEach(userId => {
+    if (datasetUser[userId][key] === value) {
+      userData[userId] = {
+        id: datasetUser[userId].id,
+        email: datasetUser[userId].email,
+        password: datasetUser[userId].password,
+      };
+    }
+  });
   return userData;
 };
 
 const ownsUrlId = (urlId, userId, datasetUser, datasetUrl) => {
-  if (existsUrlId(urlId, datasetUrl) === false || existsUserId(userId, datasetUser) === false) return false;
-  
+  if (typeof urlId !== 'string') return false;
+  if (typeof userId !== 'string') return false;
+  if (urlId === '') return false;
+  if (userId === '') return false;
+  if (datasetUrl[urlId] === undefined) return false;
+  if (datasetUser[userId] === undefined) return false;  
   if (datasetUrl[urlId].userId !== userId) return false;
-
   return true;
 };
 
 const validEmail = (email) => {
   if (typeof email !== 'string') return false;
-
   if (email === '') return false;
-
   return true;
 };
 
@@ -158,9 +167,8 @@ module.exports = {
   createUser,
   existsUrlId,
   getUserByEmail,
-  loggedIn,
   getUrlsByUserId,
-  getUserById,
+  filterUsers,
   ownsUrlId,
   validEmail,
   validPassword,

@@ -9,9 +9,8 @@ const {
   createUser,
   existsUrlId,
   getUserByEmail,
-  loggedIn,
   getUrlsByUserId,
-  getUserById,
+  filterUsers,
   ownsUrlId,
   validEmail,
   validPassword,
@@ -35,34 +34,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(express.static("public"));
 
-const authenticateUser = (email, password, datasetUser) => {
-  if (typeof email !== 'string' || typeof password !== 'string') return false;
-  if (email === '' || password === '') return false;
-  // Find a user record that matches the provided email and password
-  const userObject = Object.values(datasetUser)
-    .find(userId => userId.email === email &&
-      userId.password === password
-      );
-
-  // If a user was found, then this user is authenticated
-  const isAuthenticated = userObject !== undefined;
-  return isAuthenticated;
-};
-
-const redirectUnauthorized = (res, userId, datasetUser, path) => {
-  if (loggedIn(userId, dbUser) === false) {
-    res.redirect(path);
-    return true;
-  }
-};
-
-const redirectIfLoggedIn = (res, userId, datasetUser, path) => {
-  if (loggedIn(userId, dbUser) === true) {
-    res.redirect(path);
-    return true;
-  }
-};
-
 /*
  * ROUTES FOR GET REQUESTS
  */
@@ -77,9 +48,12 @@ app.get('/u/:id', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  // Authorize user
   const userId = req.session.userId;
-  if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
-  const userData = getUserById(userId, dbUser);
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
   const templateVars = { userData };
   return res.render('urls_new', templateVars);
 });
@@ -92,39 +66,46 @@ app.get('/urls/:id', (req, res) => {
   }
 
   const userId = req.session.userId;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
   // Ensure user owns this urlId
   if (ownsUrlId(urlId, userId, dbUser, dbUrl) === false) {
     return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
   }
 
   const longUrl = dbUrl[urlId].longUrl;
-  const userData = getUserById(userId, dbUser);
   const templateVars = { userData, urlId, longUrl };
   return res.render('urls_show', templateVars);
 });
 
 app.get('/login', (req, res) => {
-  const userId = req.session.userId;
-  if (redirectIfLoggedIn(res, userId, dbUser, '/urls')) return;
-  const userData = getUserById(userId, dbUser);
-  const templateVars = { userData };
-  return res.render('login', templateVars);
+  return res.render('login', {});
 });
 
 app.get('/register', (req, res) => {
+  // Authorize user, redirect if already logged in
   const userId = req.session.userId;
-  if (redirectIfLoggedIn(res, userId, dbUser, '/urls')) return;
-  const userData = getUserById(userId, dbUser);
-  const templateVars = { userData };
-  return res.render('register', templateVars);
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] !== undefined) {
+    return res.redirect('/login');
+  }
+
+  return res.render('register', {});
 });
 
 app.get('/urls', (req, res) => {
+  // Authorize user
   const userId = req.session.userId;
-  if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
-  const userData = getUserById(userId, dbUser);
-  const urls = getUrlsByUserId(userId, dbUser, dbUrl);
-  const templateVars = { userData, urls };
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
+  const urls = getUrlsByUserId(userId, dbUrl);
+  const templateVars = { urls, userData: userData[userId] };
   return res.render('urls_index', templateVars);
 });
 
@@ -141,7 +122,10 @@ app.get('/*', (req, res) => {
  */
 app.post('/urls/:id/update', (req, res) => {
   const userId = req.session.userId;
-  if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
+  if (filterUsers('id', userId, dbUser) === undefined) {
+    return res.redirect('/login');
+  }
+
   const urlId = req.params.id;
   // Ensure the requested urlId exists
   if (existsUrlId(urlId, dbUrl) === false) {
@@ -159,8 +143,13 @@ app.post('/urls/:id/update', (req, res) => {
 });
 
 app.post('/urls/:id/delete', (req, res) => {
+  // Authorize user
   const userId = req.session.userId;
-  if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
   const urlId = req.params.id;
   // Ensure the requested urlId exists
   if (existsUrlId(urlId, dbUrl) === false) {
@@ -177,24 +166,33 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const userId = req.session.userId;
-  if (redirectIfLoggedIn(res, userId, dbUser, '/urls')) return;
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to login if they didn't enter an email or password
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
     return res.status(404).send('404 - Not found');
   }
-
-  // Authenticate the user
-  const hashedPassword = bcrypt.compareSync(password, submittedPassword);
-  if (authenticateUser(submittedEmail, hashedPassword, dbUser) === false) {
-    return res.status(403).send('403 - Forbidden. We could not authenticate you with the provided credentials.');
+  
+  const errMessage = '403 - Forbidden. We could not authenticate you with the provided credentials.';
+  // Retrieve user record
+  const userData = filterUsers('email', submittedEmail, dbUser);
+  if (userData.id === undefined) {
+    return res.status(403).send(errMessage);
   }
 
-  // User was authenticated, retrieve user data
-  const userData = getUserByEmail(submittedEmail, dbUser);
-  // Log the user in, then redirect
+  const storedEmail = userData.email;
+  const isAuthenticatedEmail = submittedEmail === storedEmail;
+  if (isAuthenticatedEmail === false) {
+    return res.status(403).send(errMessage);
+  }
+
+  const storedPassword = userData.password;
+  const isAuthenticatedPassword = bcrypt.compareSync(submittedPassword, storedPassword);
+  if (isAuthenticatedPassword === false) {
+    return res.status(403).send(errMessage);
+  }
+
+  // User is authenticated
   req.session.userId = userData.id;
   return res.redirect('/urls');
 });
@@ -205,8 +203,13 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
+  // Authorize user, redirect if already signed in
   const userId = req.session.userId;
-  if (redirectIfLoggedIn(res, userId, dbUser, '/urls')) return;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] !== undefined) {
+    return res.redirect('/urls');
+  }
+
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter an email or password
@@ -228,8 +231,13 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
+  // Authorize user
   const userId = req.session.userId;
-  if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
+  const userData = filterUsers('id', userId, dbUser);
+  if (userData[userId] === undefined) {
+    return res.redirect('/login');
+  }
+
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
