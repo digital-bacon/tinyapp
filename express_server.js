@@ -56,7 +56,7 @@ app.get('/register', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  // Authorize user
+  // Authorize user, redirect if not logged in
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] === undefined) {
@@ -68,7 +68,7 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  // Authorize user
+  // Authorize user, redirect if not logged in
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] === undefined) {
@@ -174,7 +174,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  // Authorize user, redirect if already signed in
+  // Authorize user, redirect if already logged in
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] !== undefined) {
@@ -183,7 +183,7 @@ app.post('/register', (req, res) => {
 
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
-  // Don't allow a user to register if they didn't enter an email or password
+  // Don't allow a user to register if they didn't enter a valid email or password
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
     return res.status(404).send('404 - Not found');
   }
@@ -207,7 +207,7 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  // Authorize user
+  // Authorize user, redirect if not logged in
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] === undefined) {
@@ -257,7 +257,7 @@ app.post('/urls/:id/update', (req, res) => {
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  // Authorize user
+  // Authorize user, redirect if not logged in
   const userId = req.session.userId;
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] === undefined) {

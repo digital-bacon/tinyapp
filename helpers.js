@@ -29,31 +29,6 @@ const existsUrlId = (urlId, datasetUrl) => {
   return true;
 };
 
-const existsUserId = (userId, datasetUser) => {
-  if (typeof userId !== 'string') return false;
-  if (userId === '') return false;
-  if (datasetUser[userId] === undefined) return false;
-  return false;
-};
-
-const getUserByEmail = (email, datasetUser) => {
-  let userData;
-  if (validEmail === false) return userData;
-
-  userData = Object.values(datasetUser)
-    .find(userId => userId.email === email);
-
-  return userData;
-};
-
-const loggedIn = (userId, datasetUser) => {
-  if (validUserId(userId) === false) return false;
-
-  if (datasetUser[userId] === undefined) return false;
-  
-  return true;
-};
-
 const generateUrlId = () => {
   const characterSets = {
     lowercase: 'abcdefghijklmnopqrstuvwxyz',
@@ -91,20 +66,6 @@ const generateRandomString = (desiredLength = 0, characterSet) => {
   const randomCharacter = characterSet[Math.floor(Math.random() * characterSet.length) + 0];
   randomString += randomCharacter + generateRandomString((desiredLength - 1), characterSet);
   return randomString;
-};
-
-const getUrlsByUserId = (userId, datasetUrl) => {
-  const urlData = {};
-  Object.keys(datasetUrl).forEach(urlId => {
-    if (datasetUrl[urlId].userId === userId) {
-      urlData[urlId] = {
-        userId,
-        longUrl: datasetUrl[urlId].longUrl,
-      };
-    }
-  });
-
-  return urlData;
 };
 
 const filterUrls = (key, value, datasetUrl) => {
@@ -181,21 +142,11 @@ const validUrl = (url) => {
   return true;
 };
 
-const validUserId = (userId) => {
-  if (typeof userId !== 'string') return false;
-
-  if (userId === '') return false;
-
-  return true;
-};
-
 module.exports = {
   createShortUrl,
   createUser,
-  existsUrlId,
   filterUrls,
   filterUsers,
-  ownsUrlId,
   validEmail,
   validPassword,
   validUrl,
