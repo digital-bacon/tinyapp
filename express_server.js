@@ -219,14 +219,11 @@ app.post('/register', (req, res) => {
     return res.status(404).send('404 - Not found');
   }
   
-  // TODO: Abstract hashed password generation and newUserId generation to createUser()
-  // Hash the password
+  // Create a new user record
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
-  // Generate a random user id, then record this user in the dataset
-  const newUserId = generateUserId();
-  createUser(dbUser, newUserId, submittedEmail, hashedPassword);
+  const newUser = createUser(dbUser, submittedEmail, hashedPassword);
   // Log the new user in, then redirect
-  req.session.userId = newUserId;
+  req.session.userId = newUser.id;
   return res.redirect('/urls');
 });
 

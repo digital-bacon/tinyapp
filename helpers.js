@@ -4,7 +4,8 @@ const createShortUrl = (datasetUrl, userId, longUrl) => {
   return datasetUrl[newUrlId];
 }
 
-const createUser = (datasetUser, id, email, password) => {
+const createUser = (datasetUser, email, password) => {
+  const id = generateUserId();
   datasetUser[id] = { id, email, password };
   return datasetUser[id];
 }
