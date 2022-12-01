@@ -24,7 +24,9 @@ app.use(cookieSession({
   keys: [
     '0MbFr6DEq2YyJpaQQhRfpQua5jQYpXa3vHLeMDET677s7TujQagyjoQZRb',
     '6nWCmHRRwz8yQkMTLwNsR5HrR2AdW09QLYDuCPs52VxXKbGG8fmmjWZgPCFafkAJCqHXXuoKYkPsHn',
-    '3R51n4DqTiAkiGHpLmPfNqrNB0o6C1C2ec9m4iX'
+    '3R51n4DqTiAkiGHpLmPfNqrNB0o6C1C2ec9m4iX',
+    'oRJWd6TkHph39rP3fzADVm8PsjctrzpU6zUfFZJ8Gn0KBiLACV3jTKZ2RAyWsf5Y',
+    'Us0EQWB0HCm6djvHCHMEB7TUz3FDNENUnPurTNHdj7THC67jmhJteZyf2nyg1WwZXVGhEPQFY6g6xXxXZcot2JXaFRC'
   ],
   
   // Cookie Options
@@ -243,6 +245,11 @@ app.post('/register', (req, res) => {
   // Create a new user record
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
   const newUser = createUser(dbUser, submittedEmail, hashedPassword);
+  // If a user wasn't returned, return a server error
+  if (newUser === undefined) {
+    return res.status(500).send('500 - Internal Server Error');
+  }
+
   // Log the new user in, then redirect
   req.session.userId = newUser.id;
   return res.redirect('/urls');
@@ -262,7 +269,11 @@ app.post('/urls', (req, res) => {
   };
 
   // Create a new short url record, then redirect to urls/
-  createShortUrl(dbUrl, userId, submittedUrl);
+  const newUrl = createShortUrl(dbUrl, userId, submittedUrl);
+  // If a URL wasn't returned, return a server error
+  if (newUrl === undefined) {
+    return res.status(500).send('500 - Internal Server Error');
+  }
   return res.redirect('/urls');
 });
 

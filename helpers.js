@@ -5,9 +5,10 @@ const createShortUrl = (datasetUrl, userId, longUrl) => {
 }
 
 const createUser = (datasetUser, email, password) => {
-  const id = generateUserId();
-  datasetUser[id] = { id, email, password };
-  return datasetUser[id];
+  const userId = generateUserId();
+  if (datasetUser[userId] !== undefined) return undefined;
+  datasetUser[userId] = { userId, email, password };
+  return datasetUser[userId];
 }
 
 const existsUrlId = (urlId, datasetUrl) => {
