@@ -217,7 +217,7 @@ app.post('/urls', (req, res) => {
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
-  };
+  }
 
   // Create a new short url record, then redirect to urls/
   const newUrl = createShortUrl(dbUrl, userId, submittedUrl);

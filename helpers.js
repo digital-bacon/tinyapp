@@ -3,30 +3,22 @@ const createShortUrl = (datasetUrl, userId, longUrl) => {
   if (typeof longUrl !== 'string') return;
   if (userId === '') return false;
   if (longUrl === '') return false;
-  if (typeof datasetUrl !== 'object') return
+  if (typeof datasetUrl !== 'object') return;
   const newUrlId = generateUrlId();
   datasetUrl[newUrlId] = { userId, longUrl };
   return datasetUrl[newUrlId];
-}
+};
 
 const createUser = (datasetUser, email, password) => {
   if (typeof email !== 'string') return;
   if (typeof password !== 'string') return;
   if (email === '') return false;
   if (password === '') return false;
-  if (typeof datasetUser !== 'object') return
+  if (typeof datasetUser !== 'object') return;
   const id = generateUserId();
   if (datasetUser[id] !== undefined) return;
   datasetUser[id] = { id, email, password };
   return datasetUser[id];
-}
-
-const existsUrlId = (urlId, datasetUrl) => {
-  if (validUrlId(urlId) === false) return false;
-
-  if (datasetUrl[urlId] === undefined) return false;
-
-  return true;
 };
 
 const generateUrlId = () => {
@@ -39,7 +31,7 @@ const generateUrlId = () => {
   const useCharacters = Object.values(characterSets).join('');
   const newId = generateRandomString(6, useCharacters);
   return newId;
-}
+};
 
 const generateUserId = () => {
   const characterSets = {
@@ -50,7 +42,7 @@ const generateUserId = () => {
   const useCharacters = Object.values(characterSets).join('');
   const newUserId = generateRandomString(5, useCharacters);
   return newUserId;
-}
+};
 
 /**
  * Function that returns a random string of a specified length from a
@@ -101,17 +93,6 @@ const filterUsers = (key, value, datasetUser) => {
   return userData;
 };
 
-const ownsUrlId = (urlId, userId, datasetUser, datasetUrl) => {
-  if (typeof urlId !== 'string') return false;
-  if (typeof userId !== 'string') return false;
-  if (urlId === '') return false;
-  if (userId === '') return false;
-  if (datasetUrl[urlId] === undefined) return false;
-  if (datasetUser[userId] === undefined) return false;  
-  if (datasetUrl[urlId].userId !== userId) return false;
-  return true;
-};
-
 const validEmail = (email) => {
   if (typeof email !== 'string') return false;
   if (email === '') return false;
@@ -120,25 +101,13 @@ const validEmail = (email) => {
 
 const validPassword = (password) => {
   if (typeof password !== 'string') return false;
-
   if (password === '') return false;
-
-  return true;
-};
-
-const validUrlId = (shortUrlId) => {
-  if (typeof shortUrlId !== 'string') return false;
-
-  if (shortUrlId === '') return false;
-
   return true;
 };
 
 const validUrl = (url) => {
   if (typeof url !== 'string') return false;
-
   if (url === '') return false;
-
   return true;
 };
 
