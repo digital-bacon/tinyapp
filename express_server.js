@@ -57,6 +57,13 @@ const redirectUnauthorized = (res, userId, datasetUser, path) => {
   }
 };
 
+const redirectIfLoggedIn = (res, userId, datasetUser, path) => {
+  if (loggedIn(userId, dbUser) === true) {
+    res.redirect(path);
+    return true;
+  }
+};
+
 /*
  * ROUTES FOR GET REQUESTS
  */
@@ -71,7 +78,6 @@ app.get('/u/:id', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  // Redirect if the user is not logged in
   const userId = req.session.userId;
   redirectUnauthorized(res, userId, dbUser, '/login');
   const userData = getUserById(userId, dbUser);
@@ -99,32 +105,22 @@ app.get('/urls/:id', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === true) {
-    return res.redirect('/urls');
-  }
-
+  redirectIfLoggedIn(res, userId, dbUser, '/urls');
   const userData = getUserById(userId, dbUser);
   const templateVars = { userData };
   return res.render('login', templateVars);
 });
 
 app.get('/register', (req, res) => {
-  // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === true) {
-    return res.redirect('/urls');
-  }
-
+  redirectIfLoggedIn(res, userId, dbUser, '/urls');
   const userData = getUserById(userId, dbUser);
   const templateVars = { userData };
   return res.render('register', templateVars);
 });
 
 app.get('/urls', (req, res) => {
-  // TODO: abstract user auth check and redirect to helper function
-  // Redirect if the user is not logged in
   const userId = req.session.userId;
   if (redirectUnauthorized(res, userId, dbUser, '/login')) return;
   const userData = getUserById(userId, dbUser);
@@ -145,7 +141,6 @@ app.get('/*', (req, res) => {
  * ROUTES FOR POST REQUESTS
  */
 app.post('/urls/:id/update', (req, res) => {
-  // Redirect if the user is not logged in
   const userId = req.session.userId;
   redirectUnauthorized(res, userId, dbUser, '/login');
   const urlId = req.params.id;
@@ -165,7 +160,6 @@ app.post('/urls/:id/update', (req, res) => {
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  // Redirect if the user is not logged in
   const userId = req.session.userId;
   redirectUnauthorized(res, userId, dbUser, '/login');
   const urlId = req.params.id;
@@ -184,12 +178,8 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === true) {
-    return res.redirect('/urls');
-  }
-
+  redirectIfLoggedIn(res, userId, dbUser, '/urls');
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to login if they didn't enter an email or password
@@ -215,12 +205,8 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  // Redirect if the user is already logged in
   const userId = req.session.userId;
-  if (loggedIn(userId, dbUser) === true) {
-    return res.redirect('/urls');
-  }
-
+  redirectIfLoggedIn(res, userId, dbUser, '/urls');
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter an email or password
@@ -245,7 +231,6 @@ app.post('/register', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  // Redirect if the user is not logged in
   const userId = req.session.userId;
   redirectUnauthorized(res, userId, dbUser, '/login');
   const submittedUrl = req.body.longUrl;
