@@ -10,7 +10,6 @@ const {
   existsUrlId,
   getUserByEmail,
   loggedIn,
-  generateUserId,
   getUrlsByUserId,
   getUserById,
   ownsUrlId,
