@@ -10,10 +10,7 @@ const createShortUrl = (datasetUrl, userId, longUrl) => {
 };
 
 const createUser = (datasetUser, email, password) => {
-  if (typeof email !== 'string') return;
-  if (typeof password !== 'string') return;
-  if (email === '') return;
-  if (password === '') return;
+  if (validEmail === false || validPassword === false) return;
   if (typeof datasetUser !== 'object') return;
   const id = generateUserId();
   if (datasetUser[id] !== undefined) return;

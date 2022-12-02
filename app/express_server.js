@@ -2,8 +2,8 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
-const dbUrl = require('./data/url');
-const dbUser = require('./data/user');
+const dbUrl = require('../data/url');
+const dbUser = require('../data/user');
 const {
   createShortUrl,
   createUser,
@@ -80,6 +80,12 @@ const userMustOwnUrl = (req, res, next) => {
  * ROUTES FOR GET REQUESTS
  */
 app.get('/login', (req, res) => {
+  // Redirect if already logged in
+  const userId = req.session.userId;
+  const userData = dbUser[userId];
+  if (userData !== undefined) {
+    return res.redirect('/urls');
+  }
   return res.render('login', {});
 });
 
@@ -139,22 +145,21 @@ app.post('/login', (req, res) => {
   const submittedPassword = req.body.password;
   // Don't allow a user to login if they didn't enter an email or password
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
-    return res.status(404).send('404 - Not found');
+    return res.status(400).send('400 - Bad request. It seems you did not provide a valid email and/or password');
   }
   
-  const errMessage = '401 - Unauthorized. We could not authenticate you with the provided credentials.';
   // Retrieve user record
   const userResults = filterUsers('email', submittedEmail, dbUser);
   const userId = Object.keys(userResults)[0];
   const userData = dbUser[userId];
   if (userData === undefined) {
-    return res.status(403).send(errMessage);
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials.');
   }
 
   const storedPassword = userData.password;
   const isAuthenticatedPassword = bcrypt.compareSync(submittedPassword, storedPassword);
   if (isAuthenticatedPassword === false) {
-    return res.status(403).send(errMessage);
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials.');
   }
 
   // User is authenticated
@@ -168,13 +173,6 @@ app.post('/logout', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  // Redirect if already logged in
-  const userId = req.session.userId;
-  const userData = filterUsers('id', userId, dbUser);
-  if (userData[userId] !== undefined) {
-    return res.redirect('/urls');
-  }
-
   const submittedEmail = req.body.email;
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter a valid email or password
