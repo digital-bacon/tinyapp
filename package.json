@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./app/express_server.js",
-    "test": "mocha"
+    "test": "mocha",
+    "docs": "jsdoc2md app/*.js > api.md"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "chai": "^4.3.7",
+    "jsdoc-to-markdown": "^8.0.0",
     "mocha": "^9.2.2",
     "morgan": "^1.10.0"
   }
