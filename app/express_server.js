@@ -47,12 +47,12 @@ app.use(cookieSession({
 const authorize = (req, res, next) => {
   const userId = req.session.userId;
   if (userId === undefined) {
-    return res.redirect('/login');
+    return res.redirect(307, '/login');
   }
 
   const userData = filterUsers('id', userId, dbUser);
   if (userData[userId] === undefined) {
-    return res.redirect('/login');
+    return res.redirect(307, '/login');
   }
   
   next();
