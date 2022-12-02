@@ -36,6 +36,7 @@ http://localhost:8080/(http://localhost:8080/)
 
 * [bcrypt.js](https://github.com/dcodeIO/bcrypt.js) - Optimized bcrypt in JavaScript with zero dependencies.
 * [cookie-session](https://github.com/expressjs/cookie-session) - Simple cookie-based session middleware.
+* [ejs](https://github.com/mde/ejs) - Embedded JavaScript templates.
 * [express](https://github.com/expressjs/express) - Fast, unopinionated, minimalist web framework for Node.js.
 * [jsdoc2md](https://github.com/jsdoc2md) - Generates markdown from js-doc annotated sources.
 * [morgan](https://github.com/expressjs/morgan) - HTTP request logger middleware for node.js.
