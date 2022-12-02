@@ -58,7 +58,7 @@ const authorize = (req, res, next) => {
   next();
 };
 
-// On POST, ensures the requested urlId exists
+// Ensures the requested urlId exists
 const urlMustExist = (req, res, next) => {
   const urlId = req.params.id;
   const urlData = dbUrl[urlId];
@@ -69,7 +69,7 @@ const urlMustExist = (req, res, next) => {
   next();
 };
 
-// On POST, ensures the requested urlId is owned by the authorized user
+// Ensures the requested urlId is owned by the authorized user
 const userMustOwnUrl = (req, res, next) => {
   const userId = req.session.userId;
   const urlId = req.params.id;
