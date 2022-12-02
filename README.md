@@ -42,6 +42,15 @@ http://localhost:8080/(http://localhost:8080/)
 * [morgan](https://github.com/expressjs/morgan) - HTTP request logger middleware for node.js.
 
 
+## Final Product
+
+!["Screenshot of URLs page"](https://github.com/digital-bacon/tinyapp/blob/main/docs/urls-page.png)
+!["Screenshot of URL singleton page"](https://github.com/digital-bacon/tinyapp/blob/main/docs/urls-singleton-page.png)
+!["Screenshot of New URL page"](https://github.com/digital-bacon/tinyapp/blob/main/docs/urls-new-page.png)
+!["Screenshot of Register page"](https://github.com/digital-bacon/tinyapp/blob/main/docs/register-page.png)
+!["Screenshot of Login page"](https://github.com/digital-bacon/tinyapp/blob/main/docs/login-page.png)
+
+
 ## Functions
 
 <dl>
