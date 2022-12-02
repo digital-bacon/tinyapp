@@ -1,8 +1,7 @@
 const createShortUrl = (datasetUrl, userId, longUrl) => {
+  if (validUrl(longUrl) === false) return;
   if (typeof userId !== 'string') return;
-  if (typeof longUrl !== 'string') return;
   if (userId === '') return;
-  if (longUrl === '') return;
   if (typeof datasetUrl !== 'object') return;
   const newUrlId = generateUrlId();
   datasetUrl[newUrlId] = { userId, longUrl };
