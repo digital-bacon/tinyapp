@@ -39,6 +39,11 @@ app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
+/*
+ * MIDDLEWARE
+ */
+
+// Authorize an existing user session, and redirect to /login if not authorized
 const authorize = (req, res, next) => {
   const userId = req.session.userId;
   if (userId === undefined) {
@@ -53,9 +58,9 @@ const authorize = (req, res, next) => {
   next();
 };
 
+// On POST, ensures the requested urlId exists
 const urlMustExist = (req, res, next) => {
   const urlId = req.params.id;
-  // Ensure the requested urlId exists
   const urlData = dbUrl[urlId];
   if (urlData === undefined) {
     return res.status(404).send('404 - Not found');
@@ -64,6 +69,7 @@ const urlMustExist = (req, res, next) => {
   next();
 };
 
+// On POST, ensures the requested urlId is owned by the authorized user
 const userMustOwnUrl = (req, res, next) => {
   const userId = req.session.userId;
   const urlId = req.params.id;

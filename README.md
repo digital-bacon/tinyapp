@@ -10,7 +10,7 @@ This app was built for educational purposes only. Do not use this app in any pro
 
 ## Purpose
 
-This project was created and published by me as part of my learnings at Lighthouse Labs. 
+As a heavy Reddit user, I want to be able to share shortened links that are tracker-free. This app allows users to input URLs, and they're given a shortened link that they can share with friends, or keep for themselves. Tracker free!
 
 
 ## Usage
