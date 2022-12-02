@@ -97,7 +97,7 @@ app.get('/register', (req, res) => {
 app.get('/urls/new', authorize, (req, res) => {
   const userId = req.session.userId;
   const userData = dbUser[userId];
-  const templateVars = { userData: userData[userId] };
+  const templateVars = { userData };
   return res.render('urls_new', templateVars);
 });
 
@@ -118,7 +118,7 @@ app.get('/urls/:id', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
   return res.render('urls_show', templateVars);
 });
 
-app.get('/u/:id', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
+app.get('/u/:id', (req, res) => {
   const longUrl = dbUrl[req.params.id].longUrl;
   return res.redirect(longUrl);
 });
@@ -179,25 +179,25 @@ app.post('/register', (req, res) => {
   const submittedPassword = req.body.password;
   // Don't allow a user to register if they didn't enter a valid email or password
   if (validEmail(submittedEmail) === false || validPassword(submittedPassword) === false) {
-    return res.status(404).send('404 - Not found');
+    return res.status(400).send('400 - Bad request. It seems you did not provide a valid email and/or password');
   }
   
   // Don't allow a user to register if they already have an account
   const foundAccount = filterUsers('email', submittedEmail, dbUser);
   if (Object.keys(foundAccount).length > 0) {
-    return res.status(404).send('404 - Not found');
+    return res.status(400).send('400 - Bad request.');
   }
   
   // Create a new user record
   const hashedPassword = bcrypt.hashSync(submittedPassword, 10);
-  const newUser = createUser(dbUser, submittedEmail, hashedPassword);
-  // If a user wasn't returned, return a server error
-  if (newUser === undefined) {
+  const newUserId = createUser(dbUser, submittedEmail, hashedPassword);
+  // If a new user was not created, return a server error
+  if (dbUser[newUserId] === undefined) {
     return res.status(500).send('500 - Internal Server Error');
   }
-  
+
   // Log the new user in, then redirect
-  req.session.userId = newUser.id;
+  req.session.userId = newUserId;
   return res.redirect('/urls');
 });
 
@@ -208,13 +208,14 @@ app.post('/urls', authorize, (req, res) => {
     return res.status(400).send('400 - It seems you did not provide a valid url');
   }
 
-  // Create a new short url record
-  const newUrl = createShortUrl(dbUrl, userId, submittedUrl);
-  // If a URL wasn't returned, return a server error
-  if (newUrl === undefined) {
+  // Create a new short url record, and return the id
+  const newUrlId = createShortUrl(dbUrl, userId, submittedUrl);
+  // If a new short Url was not created, return a server error
+  if (dbUrl[newUrlId] === undefined) {
     return res.status(500).send('500 - Internal Server Error');
   }
-  return res.redirect('/urls');
+
+  return res.redirect(`/urls/${newUrlId}`);
 });
 
 app.post('/urls/:id/update', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
