@@ -99,6 +99,8 @@ const filterUsers = (key, value, datasetUser) => {
 const validEmail = (email) => {
   if (typeof email !== 'string') return false;
   if (email === '') return false;
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (regex.test(email) === false) return false;
   return true;
 };
 
