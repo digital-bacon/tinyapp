@@ -138,7 +138,7 @@ const filterUsers = (key, value, datasetUser) => {
 
 /**
  * Function that validates a given email as an email address
- * @param {string} email - The email to evaluate 
+ * @param {string} email - The email to evaluate
  * @returns {boolean} When valid, returns true
  */
 const validEmail = (email) => {
@@ -151,7 +151,7 @@ const validEmail = (email) => {
 
 /**
  * Function that validates a given plaintext password
- * @param {string} password - The plaintext password to evaluate 
+ * @param {string} password - The plaintext password to evaluate
  * @returns {boolean} When valid, returns true
  */
 const validPassword = (password) => {
@@ -162,7 +162,7 @@ const validPassword = (password) => {
 
 /**
  * Function that validates a given url
- * @param {string} password - The plaintext password to evaluate 
+ * @param {string} password - The plaintext password to evaluate
  * @returns {boolean} When valid, returns true
  */
 const validUrl = (url) => {
