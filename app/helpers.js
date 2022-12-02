@@ -1,4 +1,4 @@
-const createShortUrl = (datasetUrl, userId, longUrl) => {
+const createTinyUrl = (datasetUrl, userId, longUrl) => {
   if (validUrl(longUrl) === false) return;
   if (typeof userId !== 'string') return;
   if (userId === '') return;
@@ -117,7 +117,7 @@ const validUrl = (url) => {
 };
 
 module.exports = {
-  createShortUrl,
+  createTinyUrl,
   createUser,
   filterUrls,
   filterUsers,

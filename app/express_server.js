@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const dbUrl = require('../data/url');
 const dbUser = require('../data/user');
 const {
-  createShortUrl,
+  createTinyUrl,
   createUser,
   filterUrls,
   filterUsers,
@@ -207,7 +207,7 @@ app.post('/urls', authorize, (req, res) => {
   }
 
   // Create a new short url record, and return the id
-  const newUrlId = createShortUrl(dbUrl, userId, submittedUrl);
+  const newUrlId = createTinyUrl(dbUrl, userId, submittedUrl);
   // If a new short Url was not created, return a server error
   if (dbUrl[newUrlId] === undefined) {
     return res.status(500).send('500 - Internal Server Error');
