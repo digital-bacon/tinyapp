@@ -121,6 +121,7 @@ app.get('/urls', (req, res) => {
   if (userData === undefined) {
     return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a> <a href="login/" title="Log in now">Log in</a>');
   }
+
   const urls = filterUrls('userId', userId, dbUrl);
   const templateVars = { urls, userData };
   return res.render('urls_index', templateVars);
@@ -136,7 +137,7 @@ app.get('/urls/:id', urlMustExist, userMustOwnUrl, (req, res) => {
   return res.render('urls_show', templateVars);
 });
 
-app.get('/u/:id', (req, res) => {
+app.get('/u/:id', urlMustExist, (req, res) => {
   const longUrl = dbUrl[req.params.id].longUrl;
   return res.redirect(longUrl);
 });
@@ -148,6 +149,7 @@ app.get('/', (req, res) => {
   if (userData === undefined) {
     return res.redirect('/login');
   }
+
   return res.redirect('/urls');
 });
 
