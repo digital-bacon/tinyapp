@@ -115,7 +115,7 @@ app.get('/urls/new', authorize, (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  // Redirect if not logged in
+  // Send error HTML if not logged in
   const userId = req.session.userId;
   const userData = dbUser[userId];
   if (userData === undefined) {
@@ -126,7 +126,8 @@ app.get('/urls', (req, res) => {
   return res.render('urls_index', templateVars);
 });
 
-app.get('/urls/:id', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
+app.get('/urls/:id', urlMustExist, userMustOwnUrl, (req, res) => {
+  // Send error HTML if not logged in
   const userId = req.session.userId;
   const userData = dbUser[userId];
   const urlId = req.params.id;
