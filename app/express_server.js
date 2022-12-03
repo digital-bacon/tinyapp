@@ -85,6 +85,7 @@ const userMustOwnUrl = (req, res, next) => {
 /*
  * ROUTES FOR GET REQUESTS
  */
+
 app.get('/login', (req, res) => {
   // Redirect if already logged in
   const userId = req.session.userId;
@@ -114,13 +115,12 @@ app.get('/urls/new', authorize, (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  // Display an HTML error if user is not logged in
+  // Redirect if not logged in
   const userId = req.session.userId;
   const userData = dbUser[userId];
-  if (userData !== undefined) {
-    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials.');
+  if (userData === undefined) {
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a> <a href="login/" title="Log in now">Log in</a>');
   }
-
   const urls = filterUrls('userId', userId, dbUrl);
   const templateVars = { urls, userData };
   return res.render('urls_index', templateVars);
@@ -141,6 +141,12 @@ app.get('/u/:id', (req, res) => {
 });
 
 app.get('/', (req, res) => {
+  // Redirect if not logged in
+  const userId = req.session.userId;
+  const userData = dbUser[userId];
+  if (userData === undefined) {
+    return res.redirect('/login');
+  }
   return res.redirect('/urls');
 });
 
@@ -164,13 +170,13 @@ app.post('/login', (req, res) => {
   const userId = Object.keys(userResults)[0];
   const userData = dbUser[userId];
   if (userData === undefined) {
-    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials.');
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a>');
   }
 
   const storedPassword = userData.password;
   const isAuthenticatedPassword = bcrypt.compareSync(submittedPassword, storedPassword);
   if (isAuthenticatedPassword === false) {
-    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials.');
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a>');
   }
 
   // User is authenticated
