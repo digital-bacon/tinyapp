@@ -113,9 +113,14 @@ app.get('/urls/new', authorize, (req, res) => {
   return res.render('urls_new', templateVars);
 });
 
-app.get('/urls', authorize, (req, res) => {
+app.get('/urls', (req, res) => {
+  // Display an HTML error if user is not logged in
   const userId = req.session.userId;
   const userData = dbUser[userId];
+  if (userData !== undefined) {
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials.');
+  }
+
   const urls = filterUrls('userId', userId, dbUrl);
   const templateVars = { urls, userData };
   return res.render('urls_index', templateVars);
