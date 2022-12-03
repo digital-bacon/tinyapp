@@ -119,7 +119,7 @@ app.get('/urls', (req, res) => {
   const userId = req.session.userId;
   const userData = dbUser[userId];
   if (userData === undefined) {
-    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a> <a href="login/" title="Log in now">Log in</a>');
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a>');
   }
 
   const urls = filterUrls('userId', userId, dbUrl);
@@ -128,7 +128,6 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/:id', urlMustExist, userMustOwnUrl, (req, res) => {
-  // Send error HTML if not logged in
   const userId = req.session.userId;
   const userData = dbUser[userId];
   const urlId = req.params.id;
@@ -219,8 +218,13 @@ app.post('/register', (req, res) => {
   return res.redirect('/urls');
 });
 
-app.post('/urls', authorize, (req, res) => {
+app.post('/urls', (req, res) => {
+  // Send error HTML if not logged in
   const userId = req.session.userId;
+  const userData = dbUser[userId];
+  if (userData === undefined) {
+    return res.status(403).send('401 - Unauthorized. We could not authenticate you with the provided credentials. <a href="login/" title="Log in now">Log in</a>');
+  }
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
