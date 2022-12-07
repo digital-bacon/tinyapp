@@ -240,7 +240,7 @@ app.post('/urls', (req, res) => {
   return res.redirect(`/urls/${newUrlId}`);
 });
 
-app.post('/urls/:id/update', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
+app.post('/urls/:id', authorize, urlMustExist, userMustOwnUrl, (req, res) => {
   const submittedUrl = req.body.longUrl;
   if (validUrl(submittedUrl) === false) {
     return res.status(400).send('400 - It seems you did not provide a valid url');
